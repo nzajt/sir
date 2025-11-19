@@ -1,0 +1,1560 @@
+{
+  "jokes": [
+    {
+      "setup": "Why don't scientists trust atoms?",
+      "punchline": "Because they make up everything!"
+    },
+    {
+      "setup": "What do you call a fake noodle?",
+      "punchline": "An impasta!"
+    },
+    {
+      "setup": "Why did the scarecrow win an award?",
+      "punchline": "He was outstanding in his field!"
+    },
+    {
+      "setup": "What do you call a bear with no teeth?",
+      "punchline": "A gummy bear!"
+    },
+    {
+      "setup": "Why don't eggs tell jokes?",
+      "punchline": "They'd crack each other up!"
+    },
+    {
+      "setup": "What do you call a sleeping bull?",
+      "punchline": "A bulldozer!"
+    },
+    {
+      "setup": "Why did the bicycle fall over?",
+      "punchline": "Because it was two tired!"
+    },
+    {
+      "setup": "What did the ocean say to the beach?",
+      "punchline": "Nothing, it just waved!"
+    },
+    {
+      "setup": "Why can't you give Elsa a balloon?",
+      "punchline": "Because she will let it go!"
+    },
+    {
+      "setup": "What do you call cheese that isn't yours?",
+      "punchline": "Nacho cheese!"
+    },
+    {
+      "setup": "Why did the math book look sad?",
+      "punchline": "Because it had too many problems!"
+    },
+    {
+      "setup": "What do you call a dinosaur that crashes his car?",
+      "punchline": "Tyrannosaurus Wrecks!"
+    },
+    {
+      "setup": "Why did the cookie go to the doctor?",
+      "punchline": "Because it felt crumbly!"
+    },
+    {
+      "setup": "What do you call a fish wearing a bowtie?",
+      "punchline": "Sofishticated!"
+    },
+    {
+      "setup": "Why don't skeletons fight each other?",
+      "punchline": "They don't have the guts!"
+    },
+    {
+      "setup": "What did one wall say to the other wall?",
+      "punchline": "I'll meet you at the corner!"
+    },
+    {
+      "setup": "Why did the student eat his homework?",
+      "punchline": "Because the teacher said it was a piece of cake!"
+    },
+    {
+      "setup": "What do you call a snowman with a six-pack?",
+      "punchline": "An abdominal snowman!"
+    },
+    {
+      "setup": "Why did the golfer bring two pairs of pants?",
+      "punchline": "In case he got a hole in one!"
+    },
+    {
+      "setup": "What's orange and sounds like a parrot?",
+      "punchline": "A carrot!"
+    },
+    {
+      "setup": "Why did the tomato turn red?",
+      "punchline": "Because it saw the salad dressing!"
+    },
+    {
+      "setup": "What do you call a pig that does karate?",
+      "punchline": "A pork chop!"
+    },
+    {
+      "setup": "Why don't oysters share their pearls?",
+      "punchline": "Because they're shellfish!"
+    },
+    {
+      "setup": "What do you call a dog magician?",
+      "punchline": "A labracadabrador!"
+    },
+    {
+      "setup": "Why did the banana go to the doctor?",
+      "punchline": "Because it wasn't peeling well!"
+    },
+    {
+      "setup": "What do you call a cow with no legs?",
+      "punchline": "Ground beef!"
+    },
+    {
+      "setup": "Why did the chicken cross the playground?",
+      "punchline": "To get to the other slide!"
+    },
+    {
+      "setup": "What did the buffalo say when his son left?",
+      "punchline": "Bison!"
+    },
+    {
+      "setup": "Why don't scientists trust stairs?",
+      "punchline": "Because they're always up to something!"
+    },
+    {
+      "setup": "What do you call a belt made of watches?",
+      "punchline": "A waist of time!"
+    },
+    {
+      "setup": "Why did the picture go to jail?",
+      "punchline": "Because it was framed!"
+    },
+    {
+      "setup": "What do you call a parade of rabbits hopping backwards?",
+      "punchline": "A receding hare-line!"
+    },
+    {
+      "setup": "Why can't a nose be 12 inches long?",
+      "punchline": "Because then it would be a foot!"
+    },
+    {
+      "setup": "What did the grape say when it got stepped on?",
+      "punchline": "Nothing, it just let out a little wine!"
+    },
+    {
+      "setup": "Why did the computer go to the doctor?",
+      "punchline": "Because it had a virus!"
+    },
+    {
+      "setup": "What do you call a shoe made of a banana?",
+      "punchline": "A slipper!"
+    },
+    {
+      "setup": "Why did the robot go on vacation?",
+      "punchline": "He needed to recharge his batteries!"
+    },
+    {
+      "setup": "What do you call a sleeping dinosaur?",
+      "punchline": "A dino-snore!"
+    },
+    {
+      "setup": "Why did the mushroom go to the party?",
+      "punchline": "Because he was a fungi!"
+    },
+    {
+      "setup": "What do you call a lazy kangaroo?",
+      "punchline": "A pouch potato!"
+    },
+    {
+      "setup": "Why did the melon jump into the lake?",
+      "punchline": "It wanted to be a watermelon!"
+    },
+    {
+      "setup": "What do you call a bear in the rain?",
+      "punchline": "A drizzly bear!"
+    },
+    {
+      "setup": "Why did the astronaut break up with his girlfriend?",
+      "punchline": "He needed space!"
+    },
+    {
+      "setup": "What do you call a duck that gets all A's?",
+      "punchline": "A wise quacker!"
+    },
+    {
+      "setup": "Why did the stadium get hot after the game?",
+      "punchline": "All the fans left!"
+    },
+    {
+      "setup": "What do you call a bee that can't make up its mind?",
+      "punchline": "A maybe!"
+    },
+    {
+      "setup": "Why did the teacher wear sunglasses?",
+      "punchline": "Because her students were so bright!"
+    },
+    {
+      "setup": "What do you call a snowman in July?",
+      "punchline": "A puddle!"
+    },
+    {
+      "setup": "Why did the baby strawberry cry?",
+      "punchline": "Because his parents were in a jam!"
+    },
+    {
+      "setup": "What do you call a train carrying bubblegum?",
+      "punchline": "A chew-chew train!"
+    },
+    {
+      "setup": "Why don't teddy bears ever order dessert?",
+      "punchline": "Because they're always stuffed!"
+    },
+    {
+      "setup": "What do you call a cat that loves bowling?",
+      "punchline": "An alley cat!"
+    },
+    {
+      "setup": "Why did the boy bring a ladder to school?",
+      "punchline": "Because he wanted to go to high school!"
+    },
+    {
+      "setup": "What do you call a sleeping pizza?",
+      "punchline": "A piZZZa!"
+    },
+    {
+      "setup": "Why did the cookie go to school?",
+      "punchline": "To become a smart cookie!"
+    },
+    {
+      "setup": "What do you call a monkey that loves chips?",
+      "punchline": "A chipmunk!"
+    },
+    {
+      "setup": "Why did the orange stop?",
+      "punchline": "It ran out of juice!"
+    },
+    {
+      "setup": "What do you call a bear with no ears?",
+      "punchline": "B!"
+    },
+    {
+      "setup": "Why did the coffee file a police report?",
+      "punchline": "It got mugged!"
+    },
+    {
+      "setup": "What do you call a sheep with no head and no legs?",
+      "punchline": "A cloud!"
+    },
+    {
+      "setup": "Why did the invisible man turn down the job offer?",
+      "punchline": "He couldn't see himself doing it!"
+    },
+    {
+      "setup": "What do you call a pig that knows karate?",
+      "punchline": "A pork chop!"
+    },
+    {
+      "setup": "Why did the girl smear peanut butter on the road?",
+      "punchline": "To go with the traffic jam!"
+    },
+    {
+      "setup": "What do you call a group of musical whales?",
+      "punchline": "An orca-stra!"
+    },
+    {
+      "setup": "Why did the kid throw his clock out the window?",
+      "punchline": "He wanted to see time fly!"
+    },
+    {
+      "setup": "What do you call a dinosaur with an extensive vocabulary?",
+      "punchline": "A thesaurus!"
+    },
+    {
+      "setup": "Why did the student study in the airplane?",
+      "punchline": "He wanted a higher education!"
+    },
+    {
+      "setup": "What do you call a horse that lives next door?",
+      "punchline": "A neigh-bor!"
+    },
+    {
+      "setup": "Why did the tree go to the dentist?",
+      "punchline": "It needed a root canal!"
+    },
+    {
+      "setup": "What do you call a dog in the summer?",
+      "punchline": "A hot dog!"
+    },
+    {
+      "setup": "Why did the moon skip dinner?",
+      "punchline": "It was full!"
+    },
+    {
+      "setup": "What do you call a fly without wings?",
+      "punchline": "A walk!"
+    },
+    {
+      "setup": "Why did the kid bring a rope to school?",
+      "punchline": "To skip class!"
+    },
+    {
+      "setup": "What do you call a bee having a bad hair day?",
+      "punchline": "A frizz-bee!"
+    },
+    {
+      "setup": "Why did the pencil do well on the test?",
+      "punchline": "It was sharp!"
+    },
+    {
+      "setup": "What do you call a rabbit that tells jokes?",
+      "punchline": "A funny bunny!"
+    },
+    {
+      "setup": "Why did the book join the police?",
+      "punchline": "It wanted to work undercover!"
+    },
+    {
+      "setup": "What do you call a sleeping cow?",
+      "punchline": "A bull-dozer!"
+    },
+    {
+      "setup": "Why did the cookie cry?",
+      "punchline": "Because his mother was a wafer so long!"
+    },
+    {
+      "setup": "What do you call a tooth in a glass of water?",
+      "punchline": "A one molar solution!"
+    },
+    {
+      "setup": "Why did the duck cross the road?",
+      "punchline": "To prove he wasn't chicken!"
+    },
+    {
+      "setup": "What do you call a centipede that can't count?",
+      "punchline": "A hundred-pede!"
+    },
+    {
+      "setup": "Why did the clock go to the principal's office?",
+      "punchline": "For tocking too much!"
+    },
+    {
+      "setup": "What do you call a cat that plays fetch?",
+      "punchline": "A retriever!"
+    },
+    {
+      "setup": "Why did the baseball team go to the bank?",
+      "punchline": "To get their pitcher!"
+    },
+    {
+      "setup": "What do you call a magic dog?",
+      "punchline": "A Labracadabrador!"
+    },
+    {
+      "setup": "Why did the tomato blush?",
+      "punchline": "It saw the salad dressing!"
+    },
+    {
+      "setup": "What do you call a potato that's always complaining?",
+      "punchline": "A commentater!"
+    },
+    {
+      "setup": "Why did the math teacher open a window?",
+      "punchline": "To help the equations get some fresh air!"
+    },
+    {
+      "setup": "What do you call a fish that practices medicine?",
+      "punchline": "A sturgeon!"
+    },
+    {
+      "setup": "Why did the skeleton go to the party alone?",
+      "punchline": "He had no body to go with!"
+    },
+    {
+      "setup": "What do you call a pile of cats?",
+      "punchline": "A meow-ntain!"
+    },
+    {
+      "setup": "Why did the computer get cold?",
+      "punchline": "It left its Windows open!"
+    },
+    {
+      "setup": "What do you call a cow that plays guitar?",
+      "punchline": "A moo-sician!"
+    },
+    {
+      "setup": "Why did the bread go to the doctor?",
+      "punchline": "It was feeling crumby!"
+    },
+    {
+      "setup": "What do you call a snake that builds things?",
+      "punchline": "A boa constructor!"
+    },
+    {
+      "setup": "Why did the paper go to the doctor?",
+      "punchline": "It had a tear!"
+    },
+    {
+      "setup": "What do you call a dinosaur that never gives up?",
+      "punchline": "A try-ceratops!"
+    },
+    {
+      "setup": "Why did the banana go out with the prune?",
+      "punchline": "Because it couldn't find a date!"
+    },
+    {
+      "setup": "What do you call a fake stone?",
+      "punchline": "A shamrock!"
+    },
+    {
+      "setup": "Why did the sun go to school?",
+      "punchline": "To get brighter!"
+    },
+    {
+      "setup": "What do you call a shoe that's made from a banana?",
+      "punchline": "A slipper!"
+    },
+    {
+      "setup": "Why did the belt go to jail?",
+      "punchline": "For holding up pants!"
+    },
+    {
+      "setup": "What do you call a boomerang that won't come back?",
+      "punchline": "A stick!"
+    },
+    {
+      "setup": "Why did the traffic light turn red?",
+      "punchline": "You would too if you had to change in the middle of the street!"
+    },
+    {
+      "setup": "What do you call a sleeping T-Rex?",
+      "punchline": "A dino-snore!"
+    },
+    {
+      "setup": "Why did the kid sit on the clock?",
+      "punchline": "He wanted to be on time!"
+    },
+    {
+      "setup": "What do you call a happy cowboy?",
+      "punchline": "A jolly rancher!"
+    },
+    {
+      "setup": "Why did the student bring scissors to class?",
+      "punchline": "He wanted to cut class!"
+    },
+    {
+      "setup": "What do you call a dinosaur at the rodeo?",
+      "punchline": "Bronco-saurus!"
+    },
+    {
+      "setup": "Why did the M&M go to school?",
+      "punchline": "Because it wanted to be a Smartie!"
+    },
+    {
+      "setup": "What do you call a penguin in the desert?",
+      "punchline": "Lost!"
+    },
+    {
+      "setup": "Why did the chicken go to the library?",
+      "punchline": "To check out a book!"
+    },
+    {
+      "setup": "What do you call a shoe made out of a banana?",
+      "punchline": "A slipper!"
+    },
+    {
+      "setup": "Why did the cookie go to the nurse?",
+      "punchline": "Because it felt crumbly!"
+    },
+    {
+      "setup": "What do you call a dinosaur that's sleeping?",
+      "punchline": "A dino-snore!"
+    },
+    {
+      "setup": "Why did the skeleton go trick or treating alone?",
+      "punchline": "Because he had no body to go with him!"
+    },
+    {
+      "setup": "What do you call a dog that can do magic?",
+      "punchline": "A Labracadabrador!"
+    },
+    {
+      "setup": "Why did the teddy bear say no to dessert?",
+      "punchline": "Because she was stuffed!"
+    },
+    {
+      "setup": "What do you call a monkey in a minefield?",
+      "punchline": "A baboom!"
+    },
+    {
+      "setup": "Why did the cookie go see the doctor?",
+      "punchline": "It was feeling crumbly!"
+    },
+    {
+      "setup": "What do you call a sleeping bull?",
+      "punchline": "A bulldozer!"
+    },
+    {
+      "setup": "Why did the crab never share?",
+      "punchline": "Because he's shellfish!"
+    },
+    {
+      "setup": "What do you call a train that sneezes?",
+      "punchline": "Achoo-choo train!"
+    },
+    {
+      "setup": "Why did the student bring a ladder to class?",
+      "punchline": "Because it was high school!"
+    },
+    {
+      "setup": "What do you call a cow on a trampoline?",
+      "punchline": "A milkshake!"
+    },
+    {
+      "setup": "Why did the computer keep sneezing?",
+      "punchline": "It had a virus!"
+    },
+    {
+      "setup": "What do you call a bear caught in the rain?",
+      "punchline": "A drizzly bear!"
+    },
+    {
+      "setup": "Why did the orange juice get pulled over?",
+      "punchline": "It couldn't concentrate!"
+    },
+    {
+      "setup": "What do you call a pig that does ballet?",
+      "punchline": "A swine lake!"
+    },
+    {
+      "setup": "Why did the chicken get a penalty?",
+      "punchline": "For fowl play!"
+    },
+    {
+      "setup": "What do you call a rabbit who tells jokes?",
+      "punchline": "A funny bunny!"
+    },
+    {
+      "setup": "Why did the guitar go to the doctor?",
+      "punchline": "It had too many strings attached!"
+    },
+    {
+      "setup": "What do you call a lazy egg?",
+      "punchline": "Eggs-hausted!"
+    },
+    {
+      "setup": "Why did the flower go to school?",
+      "punchline": "To grow its knowledge!"
+    },
+    {
+      "setup": "What do you call a sleeping pizza?",
+      "punchline": "A piZZZa!"
+    },
+    {
+      "setup": "Why did the donut go to the dentist?",
+      "punchline": "To get a filling!"
+    },
+    {
+      "setup": "What do you call a dancing sheep?",
+      "punchline": "A baa-llerina!"
+    },
+    {
+      "setup": "Why did the bike fall over during dinner?",
+      "punchline": "It was two-tired!"
+    },
+    {
+      "setup": "What do you call a cat in a Christmas hat?",
+      "punchline": "Santa Claws!"
+    },
+    {
+      "setup": "Why did the banana wear sunscreen?",
+      "punchline": "It didn't want to peel!"
+    },
+    {
+      "setup": "What do you call a fly without legs?",
+      "punchline": "A raisin!"
+    },
+    {
+      "setup": "Why did the math book go to therapy?",
+      "punchline": "It had too many problems!"
+    },
+    {
+      "setup": "What do you call a snowman with abs?",
+      "punchline": "An abdominal snowman!"
+    },
+    {
+      "setup": "Why did the chicken join a band?",
+      "punchline": "Because it had the drumsticks!"
+    },
+    {
+      "setup": "What do you call a fish that wears a crown?",
+      "punchline": "King of the sea!"
+    },
+    {
+      "setup": "Why did the apple go to the party?",
+      "punchline": "To have a core-good time!"
+    },
+    {
+      "setup": "What do you call a dinosaur with a rich vocabulary?",
+      "punchline": "A thesaurus!"
+    },
+    {
+      "setup": "Why did the duck say 'bang'?",
+      "punchline": "Because it was a firequacker!"
+    },
+    {
+      "setup": "What do you call a sleeping bag?",
+      "punchline": "A napsack!"
+    },
+    {
+      "setup": "Why did the strawberry cry?",
+      "punchline": "Because her mom was in a jam!"
+    },
+    {
+      "setup": "What do you call a dinosaur that loves to sleep?",
+      "punchline": "A stega-snore-us!"
+    },
+    {
+      "setup": "Why did the tree go to the barber?",
+      "punchline": "It needed a trim!"
+    },
+    {
+      "setup": "What do you call a laughing jar of mayonnaise?",
+      "punchline": "LMAYO!"
+    },
+    {
+      "setup": "Why did the robot go to school?",
+      "punchline": "To improve its hardware and software!"
+    },
+    {
+      "setup": "What do you call a sheep that can sing?",
+      "punchline": "Justin Baa-ber!"
+    },
+    {
+      "setup": "Why did the clock get sent to the principal?",
+      "punchline": "For tocking too much in class!"
+    },
+    {
+      "setup": "What do you call a dinosaur in a cowboy hat?",
+      "punchline": "Tyrannosaurus Tex!"
+    },
+    {
+      "setup": "Why did the banana split?",
+      "punchline": "Because it saw the ice cream shop!"
+    },
+    {
+      "setup": "What do you call a pig that does art?",
+      "punchline": "Pigcasso!"
+    },
+    {
+      "setup": "Why did the cow go to space?",
+      "punchline": "To see the moooon!"
+    },
+    {
+      "setup": "What do you call a sleeping dinosaur?",
+      "punchline": "A stega-snore-us!"
+    },
+    {
+      "setup": "Why did the grape stop in the middle of the road?",
+      "punchline": "It ran out of juice!"
+    },
+    {
+      "setup": "What do you call a bear with no socks on?",
+      "punchline": "Bare-foot!"
+    },
+    {
+      "setup": "Why did the teacher write on the window?",
+      "punchline": "She wanted the lesson to be clear!"
+    },
+    {
+      "setup": "What do you call a dinosaur that never gives up?",
+      "punchline": "Try-try-ceratops!"
+    },
+    {
+      "setup": "Why did the crayon quit its job?",
+      "punchline": "It felt burned out!"
+    },
+    {
+      "setup": "What do you call a dog who works for the post office?",
+      "punchline": "A mail carrier!"
+    },
+    {
+      "setup": "Why did the duck detective get the case?",
+      "punchline": "He always quacked it!"
+    },
+    {
+      "setup": "What do you call a unicorn with no horn?",
+      "punchline": "A horse!"
+    },
+    {
+      "setup": "Why did the watermelon have a big wedding?",
+      "punchline": "It cantaloupe!"
+    },
+    {
+      "setup": "What do you call a bee that's having a bad hair day?",
+      "punchline": "A frizz-bee!"
+    },
+    {
+      "setup": "Why did the kid throw butter out the window?",
+      "punchline": "To see a butter-fly!"
+    },
+    {
+      "setup": "What do you call a deer with no eyes?",
+      "punchline": "No eye-deer!"
+    },
+    {
+      "setup": "Why did the math teacher love the park?",
+      "punchline": "Because of all the natural logs!"
+    },
+    {
+      "setup": "What do you call a sleeping dragon?",
+      "punchline": "A fire-breathing napkin!"
+    },
+    {
+      "setup": "Why did the chicken cross the road twice?",
+      "punchline": "Because it was a double crosser!"
+    },
+    {
+      "setup": "What do you call a ghost's mom and dad?",
+      "punchline": "Trans-parents!"
+    },
+    {
+      "setup": "Why did the baker go to therapy?",
+      "punchline": "He kneaded help!"
+    },
+    {
+      "setup": "What do you call a sleeping pepper?",
+      "punchline": "A nap-eño!"
+    },
+    {
+      "setup": "Why did the lion eat the tightrope walker?",
+      "punchline": "He wanted a well-balanced meal!"
+    },
+    {
+      "setup": "What do you call a turtle that flies?",
+      "punchline": "A shell-icopter!"
+    },
+    {
+      "setup": "Why did the cookie go to the gym?",
+      "punchline": "To become one tough cookie!"
+    },
+    {
+      "setup": "What do you call a dinosaur fart?",
+      "punchline": "A blast from the past!"
+    },
+    {
+      "setup": "Why did the balloon go near the needle?",
+      "punchline": "It wanted to be a pop star!"
+    },
+    {
+      "setup": "What do you call a monkey that loves Doritos?",
+      "punchline": "A chipmunk!"
+    },
+    {
+      "setup": "Why did the phone wear glasses?",
+      "punchline": "It lost all its contacts!"
+    },
+    {
+      "setup": "What do you call a sheep doing karate?",
+      "punchline": "A lamb chop!"
+    },
+    {
+      "setup": "Why did the golfer bring an extra pair of socks?",
+      "punchline": "In case he got a hole in one!"
+    },
+    {
+      "setup": "What do you call a dog that can tell time?",
+      "punchline": "A watch dog!"
+    },
+    {
+      "setup": "Why did the egg hide?",
+      "punchline": "It was a little chicken!"
+    },
+    {
+      "setup": "What do you call a pig with three eyes?",
+      "punchline": "A piiig!"
+    },
+    {
+      "setup": "Why did the banana go to the hair salon?",
+      "punchline": "It had split ends!"
+    },
+    {
+      "setup": "What do you call an alligator in a vest?",
+      "punchline": "An investigator!"
+    },
+    {
+      "setup": "Why did the scarecrow become a motivational speaker?",
+      "punchline": "He was outstanding in his field!"
+    },
+    {
+      "setup": "What do you call a bear with extreme mood swings?",
+      "punchline": "A bi-polar bear!"
+    },
+    {
+      "setup": "Why did the cookie visit the doctor?",
+      "punchline": "It was feeling chip-ish!"
+    },
+    {
+      "setup": "What do you call a penguin with a cell phone?",
+      "punchline": "A chill-ular device user!"
+    },
+    {
+      "setup": "Why did the pony get sent to his room?",
+      "punchline": "He wouldn't stop horsing around!"
+    },
+    {
+      "setup": "What do you call a sleeping bag?",
+      "punchline": "A napsack!"
+    },
+    {
+      "setup": "Why did the computer go to art school?",
+      "punchline": "To learn about graphics!"
+    },
+    {
+      "setup": "What do you call a ghost with a broken leg?",
+      "punchline": "A hoblin' goblin!"
+    },
+    {
+      "setup": "Why did the kid bring a flashlight to school?",
+      "punchline": "He wanted to be bright!"
+    },
+    {
+      "setup": "What do you call a dinosaur that's a noisy sleeper?",
+      "punchline": "A bronto-snore-us!"
+    },
+    {
+      "setup": "Why did the clown go to the doctor?",
+      "punchline": "He was feeling a little funny!"
+    },
+    {
+      "setup": "What do you call a fish that knows everything?",
+      "punchline": "A know-it-all-bass!"
+    },
+    {
+      "setup": "Why did the donut go to school?",
+      "punchline": "To become a hole scholar!"
+    },
+    {
+      "setup": "What do you call a dog that loves taking bubble baths?",
+      "punchline": "A sham-poodle!"
+    },
+    {
+      "setup": "Why did the girl bring a ladder to the bar?",
+      "punchline": "She heard drinks were on the house!"
+    },
+    {
+      "setup": "What do you call a bee from America?",
+      "punchline": "A USB!"
+    },
+    {
+      "setup": "Why did the teddy bear skip dessert?",
+      "punchline": "It was already stuffed!"
+    },
+    {
+      "setup": "What do you call a cow that doesn't give milk?",
+      "punchline": "A milk dud!"
+    },
+    {
+      "setup": "Why did the pirate go to school?",
+      "punchline": "To improve his arrrrt skills!"
+    },
+    {
+      "setup": "What do you call a dinosaur with a great vocabulary?",
+      "punchline": "A thesaurus-rex!"
+    },
+    {
+      "setup": "Why did the leaf go to the doctor?",
+      "punchline": "It was feeling green!"
+    },
+    {
+      "setup": "What do you call a dinosaur that can't stop talking?",
+      "punchline": "A dino-bore!"
+    },
+    {
+      "setup": "Why did the musician break up with the metronome?",
+      "punchline": "The timing wasn't right!"
+    },
+    {
+      "setup": "What do you call a chicken staring at lettuce?",
+      "punchline": "Chicken sees a salad!"
+    },
+    {
+      "setup": "Why did the toilet paper roll down the hill?",
+      "punchline": "To get to the bottom!"
+    },
+    {
+      "setup": "What do you call a dog that meditates?",
+      "punchline": "Aware wolf!"
+    },
+    {
+      "setup": "Why did the ant dance on the jam jar?",
+      "punchline": "The lid said twist to open!"
+    },
+    {
+      "setup": "What do you call a dinosaur that loves spicy food?",
+      "punchline": "A chili-saurus!"
+    },
+    {
+      "setup": "Why did the cereal go to the movies?",
+      "punchline": "It heard there were good snacks!"
+    },
+    {
+      "setup": "What do you call a rabbit with fleas?",
+      "punchline": "Bugs Bunny!"
+    },
+    {
+      "setup": "Why did the spider go on the computer?",
+      "punchline": "To check its website!"
+    },
+    {
+      "setup": "What do you call a sleeping pepper?",
+      "punchline": "A jalapeño business!"
+    },
+    {
+      "setup": "Why did the kid study on the airplane?",
+      "punchline": "He wanted higher grades!"
+    },
+    {
+      "setup": "What do you call a fish that wears a tuxedo?",
+      "punchline": "So-fish-ticated!"
+    },
+    {
+      "setup": "Why did the banana wear a sweater?",
+      "punchline": "Because it was a little chilly!"
+    },
+    {
+      "setup": "What do you call a pig that knows karate?",
+      "punchline": "Pork chop!"
+    },
+    {
+      "setup": "Why did the cookie cry?",
+      "punchline": "Its mom was a wafer too long!"
+    },
+    {
+      "setup": "What do you call a snowman party?",
+      "punchline": "A snowball!"
+    },
+    {
+      "setup": "Why did the chicken go to KFC?",
+      "punchline": "To see a chicken strip!"
+    },
+    {
+      "setup": "What do you call a dinosaur that never stops cleaning?",
+      "punchline": "A Tyrannosaurus Wrecks!"
+    },
+    {
+      "setup": "Why did the football coach go to the bank?",
+      "punchline": "To get his quarter back!"
+    },
+    {
+      "setup": "What do you call a fake noodle?",
+      "punchline": "An impasta!"
+    },
+    {
+      "setup": "Why did the bicycle stand still?",
+      "punchline": "It was two tired to move!"
+    },
+    {
+      "setup": "What do you call a sheep covered in chocolate?",
+      "punchline": "A candy baa!"
+    },
+    {
+      "setup": "Why did the golfer wear two pairs of pants?",
+      "punchline": "In case he got a hole in one!"
+    },
+    {
+      "setup": "What do you call a sleeping dog?",
+      "punchline": "A hot dog!"
+    },
+    {
+      "setup": "Why did the student eat his homework?",
+      "punchline": "The teacher said it was a piece of cake!"
+    },
+    {
+      "setup": "What do you call a bee that can't decide?",
+      "punchline": "A maybe!"
+    },
+    {
+      "setup": "Why did the tomato turn red?",
+      "punchline": "It saw the salad dressing!"
+    },
+    {
+      "setup": "What do you call a pig that does karate?",
+      "punchline": "A pork chop!"
+    },
+    {
+      "setup": "Why did the scarecrow win an award?",
+      "punchline": "He was outstanding in his field!"
+    },
+    {
+      "setup": "What do you call a bear with no teeth?",
+      "punchline": "A gummy bear!"
+    },
+    {
+      "setup": "Why don't eggs tell jokes?",
+      "punchline": "They'd crack each other up!"
+    },
+    {
+      "setup": "What do you call a sleeping bull?",
+      "punchline": "A bulldozer!"
+    },
+    {
+      "setup": "Why did the bicycle fall over?",
+      "punchline": "Because it was two tired!"
+    },
+    {
+      "setup": "What do you call cheese that isn't yours?",
+      "punchline": "Nacho cheese!"
+    },
+    {
+      "setup": "Why did the math book look sad?",
+      "punchline": "Because it had too many problems!"
+    },
+    {
+      "setup": "What do you call a dinosaur that crashes his car?",
+      "punchline": "Tyrannosaurus Wrecks!"
+    },
+    {
+      "setup": "Why did the cookie go to the doctor?",
+      "punchline": "Because it felt crumbly!"
+    },
+    {
+      "setup": "What do you call a fish wearing a bowtie?",
+      "punchline": "Sofishticated!"
+    },
+    {
+      "setup": "Why don't skeletons fight each other?",
+      "punchline": "They don't have the guts!"
+    },
+    {
+      "setup": "What do you call a snowman with a six-pack?",
+      "punchline": "An abdominal snowman!"
+    },
+    {
+      "setup": "Why did the golfer bring two pairs of pants?",
+      "punchline": "In case he got a hole in one!"
+    },
+    {
+      "setup": "What's orange and sounds like a parrot?",
+      "punchline": "A carrot!"
+    },
+    {
+      "setup": "Why did the banana go to the doctor?",
+      "punchline": "Because it wasn't peeling well!"
+    },
+    {
+      "setup": "What do you call a cow with no legs?",
+      "punchline": "Ground beef!"
+    },
+    {
+      "setup": "Why did the chicken cross the playground?",
+      "punchline": "To get to the other slide!"
+    },
+    {
+      "setup": "What do you call a belt made of watches?",
+      "punchline": "A waist of time!"
+    },
+    {
+      "setup": "Why did the picture go to jail?",
+      "punchline": "Because it was framed!"
+    },
+    {
+      "setup": "What do you call a parade of rabbits hopping backwards?",
+      "punchline": "A receding hare-line!"
+    },
+    {
+      "setup": "Why can't a nose be 12 inches long?",
+      "punchline": "Because then it would be a foot!"
+    },
+    {
+      "setup": "What do you call a shoe made of a banana?",
+      "punchline": "A slipper!"
+    },
+    {
+      "setup": "Why did the robot go on vacation?",
+      "punchline": "He needed to recharge his batteries!"
+    },
+    {
+      "setup": "What do you call a sleeping dinosaur?",
+      "punchline": "A dino-snore!"
+    },
+    {
+      "setup": "Why did the mushroom go to the party?",
+      "punchline": "Because he was a fungi!"
+    },
+    {
+      "setup": "What do you call a lazy kangaroo?",
+      "punchline": "A pouch potato!"
+    },
+    {
+      "setup": "Why did the melon jump into the lake?",
+      "punchline": "It wanted to be a watermelon!"
+    },
+    {
+      "setup": "What do you call a bear in the rain?",
+      "punchline": "A drizzly bear!"
+    },
+    {
+      "setup": "Why did the astronaut break up with his girlfriend?",
+      "punchline": "He needed space!"
+    },
+    {
+      "setup": "What do you call a duck that gets all A's?",
+      "punchline": "A wise quacker!"
+    },
+    {
+      "setup": "Why did the stadium get hot after the game?",
+      "punchline": "All the fans left!"
+    },
+    {
+      "setup": "What do you call a train carrying bubblegum?",
+      "punchline": "A chew-chew train!"
+    },
+    {
+      "setup": "Why don't teddy bears ever order dessert?",
+      "punchline": "Because they're always stuffed!"
+    },
+    {
+      "setup": "What do you call a cat that loves bowling?",
+      "punchline": "An alley cat!"
+    },
+    {
+      "setup": "Why did the boy bring a ladder to school?",
+      "punchline": "Because he wanted to go to high school!"
+    },
+    {
+      "setup": "What do you call a monkey that loves chips?",
+      "punchline": "A chipmunk!"
+    },
+    {
+      "setup": "Why did the orange stop?",
+      "punchline": "It ran out of juice!"
+    },
+    {
+      "setup": "What do you call a bear with no ears?",
+      "punchline": "B!"
+    },
+    {
+      "setup": "Why did the coffee file a police report?",
+      "punchline": "It got mugged!"
+    },
+    {
+      "setup": "What do you call a sheep with no head and no legs?",
+      "punchline": "A cloud!"
+    },
+    {
+      "setup": "Why did the invisible man turn down the job offer?",
+      "punchline": "He couldn't see himself doing it!"
+    },
+    {
+      "setup": "What do you call a group of musical whales?",
+      "punchline": "An orca-stra!"
+    },
+    {
+      "setup": "Why did the kid throw his clock out the window?",
+      "punchline": "He wanted to see time fly!"
+    },
+    {
+      "setup": "What do you call a horse that lives next door?",
+      "punchline": "A neigh-bor!"
+    },
+    {
+      "setup": "Why did the tree go to the dentist?",
+      "punchline": "It needed a root canal!"
+    },
+    {
+      "setup": "What do you call a dog in the summer?",
+      "punchline": "A hot dog!"
+    },
+    {
+      "setup": "Why did the moon skip dinner?",
+      "punchline": "It was full!"
+    },
+    {
+      "setup": "What do you call a fly without wings?",
+      "punchline": "A walk!"
+    },
+    {
+      "setup": "Why did the kid bring a rope to school?",
+      "punchline": "To skip class!"
+    },
+    {
+      "setup": "What do you call a bee having a bad hair day?",
+      "punchline": "A frizz-bee!"
+    },
+    {
+      "setup": "Why did the pencil do well on the test?",
+      "punchline": "It was sharp!"
+    },
+    {
+      "setup": "What do you call a rabbit that tells jokes?",
+      "punchline": "A funny bunny!"
+    },
+    {
+      "setup": "Why did the book join the police?",
+      "punchline": "It wanted to work undercover!"
+    },
+    {
+      "setup": "What do you call a tooth in a glass of water?",
+      "punchline": "A one molar solution!"
+    },
+    {
+      "setup": "Why did the duck cross the road?",
+      "punchline": "To prove he wasn't chicken!"
+    },
+    {
+      "setup": "What do you call a centipede that can't count?",
+      "punchline": "A hundred-pede!"
+    },
+    {
+      "setup": "Why did the clock go to the principal's office?",
+      "punchline": "For tocking too much!"
+    },
+    {
+      "setup": "What do you call a cat that plays fetch?",
+      "punchline": "A retriever!"
+    },
+    {
+      "setup": "Why did the baseball team go to the bank?",
+      "punchline": "To get their pitcher!"
+    },
+    {
+      "setup": "What do you call a potato that's always complaining?",
+      "punchline": "A commentater!"
+    },
+    {
+      "setup": "Why did the math teacher open a window?",
+      "punchline": "To help the equations get some fresh air!"
+    },
+    {
+      "setup": "What do you call a fish that practices medicine?",
+      "punchline": "A sturgeon!"
+    },
+    {
+      "setup": "Why did the skeleton go to the party alone?",
+      "punchline": "He had no body to go with!"
+    },
+    {
+      "setup": "What do you call a pile of cats?",
+      "punchline": "A meow-ntain!"
+    },
+    {
+      "setup": "Why did the computer get cold?",
+      "punchline": "It left its Windows open!"
+    },
+    {
+      "setup": "What do you call a cow that plays guitar?",
+      "punchline": "A moo-sician!"
+    },
+    {
+      "setup": "Why did the bread go to the doctor?",
+      "punchline": "It was feeling crumby!"
+    },
+    {
+      "setup": "What do you call a snake that builds things?",
+      "punchline": "A boa constructor!"
+    },
+    {
+      "setup": "Why did the paper go to the doctor?",
+      "punchline": "It had a tear!"
+    },
+    {
+      "setup": "What do you call a dinosaur that never gives up?",
+      "punchline": "A try-ceratops!"
+    },
+    {
+      "setup": "Why did the banana go out with the prune?",
+      "punchline": "Because it couldn't find a date!"
+    },
+    {
+      "setup": "What do you call a fake stone?",
+      "punchline": "A shamrock!"
+    },
+    {
+      "setup": "Why did the sun go to school?",
+      "punchline": "To get brighter!"
+    },
+    {
+      "setup": "What do you call a boomerang that won't come back?",
+      "punchline": "A stick!"
+    },
+    {
+      "setup": "Why did the traffic light turn red?",
+      "punchline": "You would too if you had to change in the middle of the street!"
+    },
+    {
+      "setup": "What do you call a happy cowboy?",
+      "punchline": "A jolly rancher!"
+    },
+    {
+      "setup": "Why did the student bring scissors to class?",
+      "punchline": "He wanted to cut class!"
+    },
+    {
+      "setup": "What do you call a dinosaur at the rodeo?",
+      "punchline": "Bronco-saurus!"
+    },
+    {
+      "setup": "Why did the M&M go to school?",
+      "punchline": "Because it wanted to be a Smartie!"
+    },
+    {
+      "setup": "What do you call a penguin in the desert?",
+      "punchline": "Lost!"
+    },
+    {
+      "setup": "Why did the chicken go to the library?",
+      "punchline": "To check out a book!"
+    },
+    {
+      "setup": "What do you call a monkey in a minefield?",
+      "punchline": "A baboom!"
+    },
+    {
+      "setup": "Why did the crab never share?",
+      "punchline": "Because he's shellfish!"
+    },
+    {
+      "setup": "What do you call a train that sneezes?",
+      "punchline": "Achoo-choo train!"
+    },
+    {
+      "setup": "Why did the orange juice get pulled over?",
+      "punchline": "It couldn't concentrate!"
+    },
+    {
+      "setup": "What do you call a pig that does ballet?",
+      "punchline": "A swine lake!"
+    },
+    {
+      "setup": "Why did the chicken get a penalty?",
+      "punchline": "For fowl play!"
+    },
+    {
+      "setup": "What do you call a lazy egg?",
+      "punchline": "Eggs-hausted!"
+    },
+    {
+      "setup": "Why did the flower go to school?",
+      "punchline": "To grow its knowledge!"
+    },
+    {
+      "setup": "What do you call a dancing sheep?",
+      "punchline": "A baa-llerina!"
+    },
+    {
+      "setup": "Why did the bike fall over during dinner?",
+      "punchline": "It was two-tired!"
+    },
+    {
+      "setup": "What do you call a cat in a Christmas hat?",
+      "punchline": "Santa Claws!"
+    },
+    {
+      "setup": "Why did the banana wear sunscreen?",
+      "punchline": "It didn't want to peel!"
+    },
+    {
+      "setup": "What do you call a snowman with abs?",
+      "punchline": "An abdominal snowman!"
+    },
+    {
+      "setup": "Why did the chicken join a band?",
+      "punchline": "Because it had the drumsticks!"
+    },
+    {
+      "setup": "What do you call a fish that wears a crown?",
+      "punchline": "King of the sea!"
+    },
+    {
+      "setup": "Why did the apple go to the party?",
+      "punchline": "To have a core-good time!"
+    },
+    {
+      "setup": "What do you call a duck that's a firework?",
+      "punchline": "A firequacker!"
+    },
+    {
+      "setup": "Why did the strawberry cry?",
+      "punchline": "Because her mom was in a jam!"
+    },
+    {
+      "setup": "What do you call a dinosaur that loves to sleep?",
+      "punchline": "A stega-snore-us!"
+    },
+    {
+      "setup": "Why did the tree go to the barber?",
+      "punchline": "It needed a trim!"
+    },
+    {
+      "setup": "What do you call a laughing jar of mayonnaise?",
+      "punchline": "LMAYO!"
+    },
+    {
+      "setup": "Why did the robot go to school?",
+      "punchline": "To improve its hardware and software!"
+    },
+    {
+      "setup": "What do you call a sheep that can sing?",
+      "punchline": "Justin Baa-ber!"
+    },
+    {
+      "setup": "Why did the clock get sent to the principal?",
+      "punchline": "For tocking too much in class!"
+    },
+    {
+      "setup": "What do you call a dinosaur in a cowboy hat?",
+      "punchline": "Tyrannosaurus Tex!"
+    },
+    {
+      "setup": "Why did the banana split?",
+      "punchline": "Because it saw the ice cream shop!"
+    },
+    {
+      "setup": "What do you call a pig that does art?",
+      "punchline": "Pigcasso!"
+    },
+    {
+      "setup": "Why did the cow go to space?",
+      "punchline": "To see the moooon!"
+    },
+    {
+      "setup": "What do you call a grape that ran out of power?",
+      "punchline": "Out of juice!"
+    },
+    {
+      "setup": "Why did the teacher write on the window?",
+      "punchline": "She wanted the lesson to be clear!"
+    },
+    {
+      "setup": "What do you call a dinosaur that never gives up?",
+      "punchline": "Try-try-ceratops!"
+    },
+    {
+      "setup": "Why did the crayon quit its job?",
+      "punchline": "It felt burned out!"
+    },
+    {
+      "setup": "What do you call a dog who works for the post office?",
+      "punchline": "A mail carrier!"
+    },
+    {
+      "setup": "Why did the watermelon have a big wedding?",
+      "punchline": "It cantaloupe!"
+    },
+    {
+      "setup": "What do you call a deer with no eyes?",
+      "punchline": "No eye-deer!"
+    },
+    {
+      "setup": "Why did the math teacher love the park?",
+      "punchline": "Because of all the natural logs!"
+    },
+    {
+      "setup": "What do you call a ghost's parents?",
+      "punchline": "Trans-parents!"
+    },
+    {
+      "setup": "Why did the baker go to therapy?",
+      "punchline": "He kneaded help!"
+    },
+    {
+      "setup": "What do you call a turtle that flies?",
+      "punchline": "A shell-icopter!"
+    },
+    {
+      "setup": "Why did the cookie go to the gym?",
+      "punchline": "To become one tough cookie!"
+    },
+    {
+      "setup": "What do you call a balloon near a needle?",
+      "punchline": "A pop star!"
+    },
+    {
+      "setup": "Why did the phone wear glasses?",
+      "punchline": "It lost all its contacts!"
+    },
+    {
+      "setup": "What do you call a sheep doing karate?",
+      "punchline": "A lamb chop!"
+    },
+    {
+      "setup": "Why did the golfer bring an extra pair of socks?",
+      "punchline": "In case he got a hole in one!"
+    },
+    {
+      "setup": "What do you call a dog that can tell time?",
+      "punchline": "A watch dog!"
+    },
+    {
+      "setup": "Why did the egg hide?",
+      "punchline": "It was a little chicken!"
+    },
+    {
+      "setup": "What do you call a pig with three eyes?",
+      "punchline": "A piiig!"
+    },
+    {
+      "setup": "Why did the banana go to the hair salon?",
+      "punchline": "It had split ends!"
+    },
+    {
+      "setup": "What do you call an alligator in a vest?",
+      "punchline": "An investigator!"
+    },
+    {
+      "setup": "Why did the scarecrow become a motivational speaker?",
+      "punchline": "He was outstanding in his field!"
+    },
+    {
+      "setup": "What do you call a penguin with a cell phone?",
+      "punchline": "A chill-ular device user!"
+    },
+    {
+      "setup": "Why did the pony get sent to his room?",
+      "punchline": "He wouldn't stop horsing around!"
+    },
+    {
+      "setup": "What do you call a ghost with a broken leg?",
+      "punchline": "A hoblin' goblin!"
+    },
+    {
+      "setup": "Why did the kid bring a flashlight to school?",
+      "punchline": "He wanted to be bright!"
+    },
+    {
+      "setup": "What do you call a dinosaur that's a noisy sleeper?",
+      "punchline": "A bronto-snore-us!"
+    },
+    {
+      "setup": "Why did the clown go to the doctor?",
+      "punchline": "He was feeling a little funny!"
+    },
+    {
+      "setup": "What do you call a fish that knows everything?",
+      "punchline": "A know-it-all-bass!"
+    },
+    {
+      "setup": "Why did the donut go to school?",
+      "punchline": "To become a hole scholar!"
+    },
+    {
+      "setup": "What do you call a dog that loves bubble baths?",
+      "punchline": "A sham-poodle!"
+    },
+    {
+      "setup": "Why did the girl bring a ladder to the bar?",
+      "punchline": "She heard drinks were on the house!"
+    },
+    {
+      "setup": "What do you call a bee from America?",
+      "punchline": "A USB!"
+    },
+    {
+      "setup": "Why did the teddy bear skip dessert?",
+      "punchline": "It was already stuffed!"
+    },
+    {
+      "setup": "What do you call a cow that doesn't give milk?",
+      "punchline": "A milk dud!"
+    },
+    {
+      "setup": "Why did the pirate go to school?",
+      "punchline": "To improve his arrrrt skills!"
+    }
+  ]
+}
