@@ -1,7 +1,7 @@
 # SIR
 ## The Robot that tells jokes and wins science fairs
 
-SIR is a command line joke-telling program that randomly selects and delivers dad jokes from a collection of 500+ jokes.
+SIR is a joke-telling program that randomly selects and delivers dad jokes from a collection of 500+ jokes. Available as both a command-line tool and a web interface.
 
 ## How it Works
 
@@ -10,10 +10,28 @@ SIR reads from a JSON file (`dad_jokes.json`) containing a collection of jokes, 
 1. Loads all jokes from the JSON file
 2. Randomly selects one joke
 3. Displays the setup (and speaks it if `--speak` is used)
-4. Waits for you to press Enter
-5. Reveals the punchline (and speaks it if `--speak` is used)
+4. Waits for you to press Enter (CLI) or tap (Web)
+5. Reveals the punchline with a dad laugh!
 
-## Usage
+## Web Interface
+
+Start the web server:
+
+```bash
+pip install -r requirements.txt
+python3 web.py
+```
+
+Then open your browser to `http://localhost:5000` (or `http://<raspberry-pi-ip>:5000` from another device).
+
+**Features:**
+- Beautiful, animated interface
+- Tap or click to reveal punchlines
+- Confetti celebration on each joke!
+- Keyboard shortcuts: Space to reveal, Enter for new joke
+- Works great on Raspberry Pi 5
+
+## Command Line Usage
 
 ```bash
 python3 sir.py joke
@@ -70,11 +88,16 @@ Because then it would be a foot!
 - Python 3.x
 - `dad_jokes.json` file in the same directory
 
-### Optional (for text-to-speech):
+### For Web Interface:
+```bash
+pip install -r requirements.txt
+```
+
+### Optional (for CLI text-to-speech):
 - **macOS**: Built-in `say` command (already available)
-- **Linux**: Install `espeak` package
+- **Linux/Raspberry Pi**: Install `espeak` package
   ```bash
-  # Ubuntu/Debian
+  # Ubuntu/Debian/Raspberry Pi OS
   sudo apt-get install espeak
   
   # CentOS/RHEL/Fedora
@@ -82,8 +105,26 @@ Because then it would be a foot!
   ```
 - **Windows**: Install espeak or use Windows Speech Platform
 
+## Raspberry Pi 5 Setup
+
+```bash
+# Install dependencies
+sudo apt update
+sudo apt install python3-pip espeak
+
+# Install Flask
+pip install -r requirements.txt
+
+# Run the web server
+python3 web.py
+```
+
+Access from any device on your network at `http://<pi-ip-address>:5000`
+
 ## File Structure
 
-- `sir.py` - The main program
+- `sir.py` - Command line interface
+- `web.py` - Flask web interface
 - `dad_jokes.json` - Collection of 500+ dad jokes
+- `requirements.txt` - Python dependencies
 - `README.md` - This file
