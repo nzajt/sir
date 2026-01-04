@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
 
 import json
+import os
 import random
 import sys
 import subprocess
 import shutil
 import time
 
+# Get the directory where this script lives
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def load_jokes():
     try:
-        with open('dad_jokes.json', 'r') as f:
+        jokes_path = os.path.join(SCRIPT_DIR, 'dad_jokes.json')
+        with open(jokes_path, 'r') as f:
             data = json.load(f)
             return data['jokes']
     except FileNotFoundError:
