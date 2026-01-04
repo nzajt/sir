@@ -259,6 +259,51 @@ HTML_TEMPLATE = '''
             opacity: 0.7;
         }
 
+        .controls {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-sound {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 2px solid rgba(255,255,255,0.3);
+            font-size: 1.2rem;
+            padding: 0.8rem 1.5rem;
+        }
+
+        .btn-sound:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-sound.active {
+            background: linear-gradient(135deg, #533483 0%, #e94560 100%);
+            border-color: #e94560;
+            box-shadow: 0 4px 20px rgba(233, 69, 96, 0.4);
+        }
+
+        .speaking-indicator {
+            display: inline-block;
+            margin-left: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .speaking-indicator.active {
+            opacity: 1;
+            animation: speakPulse 0.5s ease-in-out infinite;
+        }
+
+        @keyframes speakPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
         .footer {
             margin-top: 3rem;
             color: rgba(255,255,255,0.4);
@@ -329,11 +374,16 @@ HTML_TEMPLATE = '''
             <p class="laugh" id="laugh">😂 Ha ha ha! That's a good one!</p>
         </div>
 
-        <button class="btn btn-primary" onclick="getNewJoke()">
-            🎲 Another Joke!
-        </button>
+        <div class="controls">
+            <button class="btn btn-primary" onclick="getNewJoke()">
+                🎲 Another Joke!
+            </button>
+            <button class="btn btn-sound" id="soundBtn" onclick="toggleSound()">
+                🔇 Sound Off
+            </button>
+        </div>
 
-        <p class="stats">Serving {{ total_jokes }} premium dad jokes</p>
+        <p class="stats">Serving {{ total_jokes }} premium dad jokes <span class="speaking-indicator" id="speakingIndicator">🗣️</span></p>
 
         <footer class="footer">
             <p>Built for science fairs & Raspberry Pi 5</p>
@@ -342,6 +392,75 @@ HTML_TEMPLATE = '''
 
     <script>
         let punchlineRevealed = false;
+        let soundEnabled = false;
+        let selectedVoice = null;
+
+        // Initialize speech synthesis and find a good "dad" voice
+        function initVoices() {
+            const voices = speechSynthesis.getVoices();
+            // Prefer deeper/male voices for the dad effect
+            const preferredVoices = ['Daniel', 'Fred', 'Alex', 'Ralph', 'Albert', 'Bruce', 'Google UK English Male', 'Microsoft David', 'en-US', 'en-GB'];
+            
+            for (const preferred of preferredVoices) {
+                const found = voices.find(v => v.name.includes(preferred) || v.lang.includes(preferred));
+                if (found) {
+                    selectedVoice = found;
+                    break;
+                }
+            }
+            // Fallback to first English voice or any voice
+            if (!selectedVoice) {
+                selectedVoice = voices.find(v => v.lang.startsWith('en')) || voices[0];
+            }
+        }
+
+        // Chrome loads voices asynchronously
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = initVoices;
+        }
+        initVoices();
+
+        function speak(text, onEnd = null) {
+            if (!soundEnabled || !('speechSynthesis' in window)) return;
+            
+            // Cancel any ongoing speech
+            speechSynthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.voice = selectedVoice;
+            utterance.rate = 0.9;  // Slightly slower for dad delivery
+            utterance.pitch = 0.9; // Slightly lower pitch
+            
+            const indicator = document.getElementById('speakingIndicator');
+            indicator.classList.add('active');
+            
+            utterance.onend = () => {
+                indicator.classList.remove('active');
+                if (onEnd) onEnd();
+            };
+            utterance.onerror = () => {
+                indicator.classList.remove('active');
+            };
+            
+            speechSynthesis.speak(utterance);
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('soundBtn');
+            
+            if (soundEnabled) {
+                btn.textContent = '🔊 Sound On';
+                btn.classList.add('active');
+                // Speak current setup to confirm sound is working
+                speak(document.getElementById('setup').textContent);
+            } else {
+                btn.textContent = '🔇 Sound Off';
+                btn.classList.remove('active');
+                speechSynthesis.cancel();
+                document.getElementById('speakingIndicator').classList.remove('active');
+            }
+        }
 
         function revealPunchline() {
             if (punchlineRevealed) return;
@@ -350,13 +469,30 @@ HTML_TEMPLATE = '''
             document.getElementById('revealBtn').classList.add('hidden');
             document.getElementById('punchline').classList.add('revealed');
             
-            setTimeout(() => {
-                document.getElementById('laugh').classList.add('visible');
-                createConfetti();
-            }, 300);
+            const punchline = document.getElementById('punchline').textContent;
+            
+            // Speak the punchline, then laugh
+            speak(punchline, () => {
+                setTimeout(() => {
+                    document.getElementById('laugh').classList.add('visible');
+                    createConfetti();
+                    speak("Ha ha ha ha! That's a good one!");
+                }, 300);
+            });
+            
+            // If sound is off, just show the laugh immediately
+            if (!soundEnabled) {
+                setTimeout(() => {
+                    document.getElementById('laugh').classList.add('visible');
+                    createConfetti();
+                }, 300);
+            }
         }
 
         function getNewJoke() {
+            // Cancel any ongoing speech
+            speechSynthesis.cancel();
+            
             fetch('/api/joke')
                 .then(response => response.json())
                 .then(data => {
@@ -367,6 +503,9 @@ HTML_TEMPLATE = '''
                     document.getElementById('punchline').classList.remove('revealed');
                     document.getElementById('revealBtn').classList.remove('hidden');
                     document.getElementById('laugh').classList.remove('visible');
+                    
+                    // Speak the new setup
+                    speak(data.setup);
                 });
         }
 
@@ -395,6 +534,8 @@ HTML_TEMPLATE = '''
                 revealPunchline();
             } else if (e.code === 'Enter') {
                 getNewJoke();
+            } else if (e.code === 'KeyS') {
+                toggleSound();
             }
         });
     </script>
