@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
-Servo Test Script for Raspberry Pi 5 (Jitter-Free Version)
-===========================================================
+Servo Test Script for Raspberry Pi 5
+=====================================
 For: HobbyPark 25KG Servo (180° control angle)
 
-Uses pigpio for hardware-timed PWM to eliminate jitter.
+Uses gpiozero with lgpio backend for Pi 5 compatibility.
+Includes jitter mitigation by releasing servo after movement.
 
 WIRING:
 -------
@@ -19,115 +20,130 @@ IMPORTANT:
 - Use a separate 5V-7.4V power supply for the servo.
 - Connect the ground of the power supply to the Pi's ground (Pin 6).
 
-SETUP:
-------
-# Install pigpio on Raspberry Pi 5:
+SETUP (Raspberry Pi 5):
+-----------------------
 sudo apt update
-sudo apt install pigpio python3-pigpio
-
-# Start the pigpio daemon (required):
-sudo pigpiod
-
-# To start pigpiod automatically on boot:
-sudo systemctl enable pigpiod
+sudo apt install python3-gpiozero python3-lgpio
 
 # Run this script:
 python3 servo_test.py
+
+JITTER MITIGATION:
+------------------
+Software PWM on Pi can cause jitter. This script mitigates it by:
+1. Releasing the servo after each movement (stops PWM signal)
+2. Using short, precise movements
+3. Option to use a PCA9685 servo driver board (recommended for production)
 """
 
 import sys
 import time
+import os
+
+# Set lgpio as the pin factory before importing gpiozero
+os.environ['GPIOZERO_PIN_FACTORY'] = 'lgpio'
 
 try:
-    import pigpio
+    from gpiozero import PWMOutputDevice
 except ImportError:
-    print("Error: pigpio not installed!")
-    print("Run: sudo apt install pigpio python3-pigpio")
-    print("Then start daemon: sudo pigpiod")
+    print("Error: gpiozero not installed!")
+    print("Run: sudo apt install python3-gpiozero python3-lgpio")
     sys.exit(1)
 
 # Configuration
 GPIO_PIN = 18  # GPIO 18 = Physical Pin 12
 
-# Servo pulse width calibration (microseconds)
-# Standard servo: 500-2500µs for full 180° range
-# Adjust these if your servo doesn't reach full range
-MIN_PULSE = 500   # Pulse width for 0° (microseconds)
-MAX_PULSE = 2500  # Pulse width for 180° (microseconds)
+# Servo pulse width calibration
+# Standard servo: 0.5ms - 2.5ms pulse for 180° range
+# PWM frequency is 50Hz (20ms period), so duty cycle:
+#   0° = 0.5ms / 20ms = 0.025 (2.5%)
+#   180° = 2.5ms / 20ms = 0.125 (12.5%)
+MIN_DUTY = 0.025   # Duty cycle for 0° (adjust if needed)
+MAX_DUTY = 0.125   # Duty cycle for 180° (adjust if needed)
+PWM_FREQ = 50      # Standard servo frequency (Hz)
 
-# Auto-release: Stop PWM signal after moving to prevent jitter
-# Set to 0 to keep servo engaged (holding position)
-AUTO_RELEASE_DELAY = 0.5  # Seconds to wait before releasing (0 = never release)
+# Jitter mitigation settings
+SETTLE_TIME = 0.3      # Time to let servo reach position before releasing
+AUTO_RELEASE = True    # Release servo after movement to prevent jitter
 
 
-class Servo:
-    """Hardware PWM servo controller using pigpio (jitter-free)."""
+class ServoController:
+    """PWM-based servo controller with jitter mitigation for Pi 5."""
     
-    def __init__(self, pi, gpio_pin, min_pulse=500, max_pulse=2500):
-        self.pi = pi
+    def __init__(self, gpio_pin, min_duty=0.025, max_duty=0.125, freq=50):
         self.gpio = gpio_pin
-        self.min_pulse = min_pulse
-        self.max_pulse = max_pulse
+        self.min_duty = min_duty
+        self.max_duty = max_duty
+        self.freq = freq
         self.current_angle = None
-        
-    def angle_to_pulse(self, angle):
-        """Convert angle (0-180) to pulse width in microseconds."""
-        angle = max(0, min(180, angle))
-        pulse_range = self.max_pulse - self.min_pulse
-        return int(self.min_pulse + (angle / 180.0) * pulse_range)
+        self.pwm = None
+        self._init_pwm()
     
-    def set_angle(self, angle, release_after=None):
+    def _init_pwm(self):
+        """Initialize PWM output."""
+        try:
+            self.pwm = PWMOutputDevice(
+                self.gpio,
+                frequency=self.freq,
+                initial_value=0
+            )
+        except Exception as e:
+            print(f"Error initializing PWM: {e}")
+            print("\nTroubleshooting:")
+            print("1. Make sure lgpio is installed: sudo apt install python3-lgpio")
+            print("2. Check that GPIO pin is not in use")
+            print("3. Try running with sudo if permission denied")
+            sys.exit(1)
+    
+    def angle_to_duty(self, angle):
+        """Convert angle (0-180) to duty cycle."""
+        angle = max(0, min(180, angle))
+        duty_range = self.max_duty - self.min_duty
+        return self.min_duty + (angle / 180.0) * duty_range
+    
+    def set_angle(self, angle, hold=False):
         """
         Move servo to specified angle (0-180 degrees).
         
         Args:
             angle: Target angle (0-180)
-            release_after: Seconds to wait before releasing servo (None = use AUTO_RELEASE_DELAY)
+            hold: If True, keep PWM signal active (may cause jitter)
         """
         angle = max(0, min(180, angle))
-        pulse_width = self.angle_to_pulse(angle)
+        duty = self.angle_to_duty(angle)
         
-        # Set servo position using hardware PWM
-        self.pi.set_servo_pulsewidth(self.gpio, pulse_width)
+        self.pwm.value = duty
         self.current_angle = angle
         
-        # Auto-release to prevent jitter when holding position
-        delay = release_after if release_after is not None else AUTO_RELEASE_DELAY
-        if delay > 0:
-            time.sleep(delay)
+        # Wait for servo to reach position
+        time.sleep(SETTLE_TIME)
+        
+        # Release to prevent jitter (unless hold is requested)
+        if AUTO_RELEASE and not hold:
             self.release()
     
-    def set_angle_smooth(self, angle, step=2, delay=0.02):
-        """Move servo smoothly to angle in small steps."""
-        if self.current_angle is None:
-            self.current_angle = 90
-            
-        start = self.current_angle
-        end = max(0, min(180, angle))
-        
-        if start < end:
-            angles = range(int(start), int(end) + 1, step)
-        else:
-            angles = range(int(start), int(end) - 1, -step)
-        
-        for a in angles:
-            pulse_width = self.angle_to_pulse(a)
-            self.pi.set_servo_pulsewidth(self.gpio, pulse_width)
-            self.current_angle = a
-            time.sleep(delay)
-        
-        # Final position
-        self.set_angle(end, release_after=AUTO_RELEASE_DELAY)
+    def set_angle_quick(self, angle):
+        """Set angle without waiting or releasing (for sweeps)."""
+        angle = max(0, min(180, angle))
+        duty = self.angle_to_duty(angle)
+        self.pwm.value = duty
+        self.current_angle = angle
     
     def release(self):
-        """Stop sending PWM signal (servo will not hold position but won't jitter)."""
-        self.pi.set_servo_pulsewidth(self.gpio, 0)
+        """Stop PWM signal (servo won't hold position but won't jitter)."""
+        self.pwm.value = 0
     
     def hold(self):
-        """Re-engage servo at current angle (will hold position)."""
+        """Re-engage servo at current angle."""
         if self.current_angle is not None:
-            pulse_width = self.angle_to_pulse(self.current_angle)
-            self.pi.set_servo_pulsewidth(self.gpio, pulse_width)
+            duty = self.angle_to_duty(self.current_angle)
+            self.pwm.value = duty
+    
+    def cleanup(self):
+        """Release resources."""
+        if self.pwm:
+            self.pwm.value = 0
+            self.pwm.close()
 
 
 def sweep_test(servo):
@@ -137,21 +153,17 @@ def sweep_test(servo):
     
     # Sweep from 0 to 180
     for angle in range(0, 181, 10):
-        pulse = servo.angle_to_pulse(angle)
-        servo.pi.set_servo_pulsewidth(servo.gpio, pulse)
-        servo.current_angle = angle
+        servo.set_angle_quick(angle)
         print(f"  → {angle}°")
-        time.sleep(0.15)
+        time.sleep(0.1)
     
     time.sleep(0.3)
     
     # Sweep from 180 to 0
     for angle in range(180, -1, -10):
-        pulse = servo.angle_to_pulse(angle)
-        servo.pi.set_servo_pulsewidth(servo.gpio, pulse)
-        servo.current_angle = angle
+        servo.set_angle_quick(angle)
         print(f"  → {angle}°")
-        time.sleep(0.15)
+        time.sleep(0.1)
     
     servo.release()
     print("✓ Sweep complete! (servo released)")
@@ -166,8 +178,8 @@ def position_test(servo):
     
     for pos in positions:
         print(f"\nMoving to {pos}°...")
-        servo.set_angle(pos, release_after=0)  # Don't auto-release during test
-        time.sleep(1)
+        servo.set_angle(pos, hold=True)  # Hold during test
+        time.sleep(0.7)
     
     servo.release()
     print("\n✓ Position test complete! (servo released)")
@@ -178,17 +190,17 @@ def interactive_mode(servo):
     print("\n🎮 Interactive Mode")
     print("-" * 30)
     print("Commands:")
-    print("  0-180   : Move to angle (e.g., '90' for center)")
-    print("  smooth X: Smooth move to angle X (e.g., 'smooth 180')")
-    print("  sweep   : Perform sweep test")
-    print("  center  : Move to 90° (center)")
-    print("  min     : Move to 0°")
-    print("  max     : Move to 180°")
-    print("  hold    : Keep servo engaged (holds position, may jitter)")
-    print("  release : Release servo (stops jitter, won't hold position)")
-    print("  quit    : Exit program")
+    print("  0-180  : Move to angle (e.g., '90' for center)")
+    print("  sweep  : Perform sweep test")
+    print("  center : Move to 90° (center)")
+    print("  min    : Move to 0°")
+    print("  max    : Move to 180°")
+    print("  hold   : Keep servo engaged (holds position, may jitter)")
+    print("  release: Release servo (stops jitter, won't hold)")
+    print("  quit   : Exit program")
     print()
-    print(f"💡 Tip: Servo auto-releases after {AUTO_RELEASE_DELAY}s to prevent jitter")
+    print("💡 Tip: Servo auto-releases after movement to prevent jitter")
+    print("   Use 'hold' if you need it to maintain position under load")
     print()
     
     while True:
@@ -202,34 +214,29 @@ def interactive_mode(servo):
             elif cmd == 'center':
                 print("  → Moving to 90°...")
                 servo.set_angle(90)
+                print("  → Done (released)")
             elif cmd == 'min':
                 print("  → Moving to 0°...")
                 servo.set_angle(0)
+                print("  → Done (released)")
             elif cmd == 'max':
                 print("  → Moving to 180°...")
                 servo.set_angle(180)
+                print("  → Done (released)")
             elif cmd == 'hold':
                 servo.hold()
                 print("  → Servo engaged (holding position)")
+                print("    ⚠️  May jitter - type 'release' to stop")
             elif cmd == 'release':
                 servo.release()
-                print("  → Servo released (not holding)")
-            elif cmd.startswith('smooth '):
-                try:
-                    angle = int(cmd.split()[1])
-                    if 0 <= angle <= 180:
-                        print(f"  → Smooth moving to {angle}°...")
-                        servo.set_angle_smooth(angle)
-                    else:
-                        print("  ⚠ Angle must be 0-180")
-                except (ValueError, IndexError):
-                    print("  ⚠ Usage: smooth <angle>")
+                print("  → Servo released")
             else:
                 try:
                     angle = int(cmd)
                     if 0 <= angle <= 180:
                         print(f"  → Moving to {angle}°...")
                         servo.set_angle(angle)
+                        print("  → Done (released)")
                     else:
                         print("  ⚠ Angle must be 0-180")
                 except ValueError:
@@ -242,35 +249,24 @@ def interactive_mode(servo):
 
 def main():
     print("=" * 50)
-    print("🤖 Servo Test for Raspberry Pi 5 (Jitter-Free)")
+    print("🤖 Servo Test for Raspberry Pi 5")
     print("   HobbyPark 25KG Servo (180°)")
-    print("   Using pigpio hardware-timed PWM")
+    print("   Using gpiozero + lgpio (Pi 5 compatible)")
     print("=" * 50)
     print(f"\nUsing GPIO pin: {GPIO_PIN} (Physical pin 12)")
     print("\n⚠️  IMPORTANT: Use external power for the servo!")
     print("   Do NOT power from Pi's 5V pin.\n")
     
-    # Connect to pigpio daemon
-    print("Connecting to pigpio daemon...")
-    pi = pigpio.pi()
-    
-    if not pi.connected:
-        print("\n❌ Error: Could not connect to pigpio daemon!")
-        print("\nTo fix this, run:")
-        print("  sudo pigpiod")
-        print("\nTo start automatically on boot:")
-        print("  sudo systemctl enable pigpiod")
-        sys.exit(1)
-    
-    print("✓ Connected to pigpio daemon!\n")
-    
     # Create servo controller
-    servo = Servo(pi, GPIO_PIN, MIN_PULSE, MAX_PULSE)
+    print("Initializing servo...")
+    servo = ServoController(GPIO_PIN, MIN_DUTY, MAX_DUTY, PWM_FREQ)
+    print("✓ Servo initialized!\n")
     
     try:
         # Center the servo first
         print("Centering servo (90°)...")
         servo.set_angle(90)
+        print("✓ Centered (released to prevent jitter)\n")
         time.sleep(0.5)
         
         # Run tests
@@ -288,9 +284,8 @@ def main():
     
     finally:
         print("\nCleaning up...")
-        servo.release()
-        pi.stop()
-        print("✓ Done! Servo released, pigpio connection closed.")
+        servo.cleanup()
+        print("✓ Done!")
 
 
 if __name__ == "__main__":
