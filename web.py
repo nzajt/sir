@@ -182,8 +182,8 @@ def speak_text_sync(text, is_laugh=False):
                 text = "Ha ha ha ha! That's a good one!"
             
             if tts_command == 'espeak':
-                # -a 200 = maximum amplitude (volume), -s 150 = slightly slower speed
-                subprocess.run(['espeak', '-a', '200', '-s', '150', text], check=False)
+                # -a 200 = max volume, -s 120 = slower speed, -g 10 = gaps between words
+                subprocess.run(['espeak', '-a', '200', '-s', '120', '-g', '10', text], check=False)
             elif tts_command == 'say':
                 subprocess.run(['say', '-v', 'Fred', text], check=False)
         except Exception as e:
