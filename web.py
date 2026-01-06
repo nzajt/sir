@@ -24,7 +24,7 @@ HTML_TEMPLATE = '''
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIR - Dad Joke Robot</title>
+    <title>BBB - The Boredom Buster Bot</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -359,8 +359,8 @@ HTML_TEMPLATE = '''
     <div class="container">
         <header class="header">
             <span class="robot-icon">🤖</span>
-            <h1 class="title">S.I.R.</h1>
-            <p class="subtitle">Super Intelligent Robot (of Dad Jokes)</p>
+            <h1 class="title">B.B.B.</h1>
+            <p class="subtitle">The Boredom Buster Bot</p>
         </header>
 
         <div class="joke-card">
@@ -386,7 +386,7 @@ HTML_TEMPLATE = '''
         <p class="stats">Serving {{ total_jokes }} premium dad jokes <span class="speaking-indicator" id="speakingIndicator">🗣️</span></p>
 
         <footer class="footer">
-            <p>Built for science fairs & Raspberry Pi 5</p>
+            <p>The Boredom Buster Bot • Built for science fairs & Raspberry Pi 5</p>
         </footer>
     </div>
 
