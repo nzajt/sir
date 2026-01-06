@@ -22,6 +22,7 @@ MOUTH_HALF = 45     # Degrees for half-open mouth
 # Try to import servo control (only works on Raspberry Pi)
 servo = None
 servo_lock = threading.Lock()
+servo_error = None  # Store error message for debugging
 
 try:
     os.environ['GPIOZERO_PIN_FACTORY'] = 'lgpio'
@@ -65,8 +66,11 @@ try:
         
 except Exception as e:
     servo = None
-    print(f"Note: Servo not available ({e})")
+    servo_error = str(e)
+    print(f"⚠️  Servo error: {e}")
     print("Running without servo control.")
+    import traceback
+    traceback.print_exc()
 
 
 def move_mouth(angle):
@@ -579,6 +583,9 @@ HTML_TEMPLATE = '''
         </p>
         <p class="servo-status {{ 'connected' if servo_connected else 'disconnected' }}" id="servoStatus">
             🤖 Servo: {{ 'Connected' if servo_connected else 'Not connected' }}
+            {% if servo_error %}
+            <br><span style="font-size: 0.8rem; color: #f87171;">Error: {{ servo_error }}</span>
+            {% endif %}
         </p>
 
         <!-- Servo Test Controls -->
@@ -839,7 +846,8 @@ def index():
         setup=joke['setup'],
         punchline=joke['punchline'],
         total_jokes=len(JOKES),
-        servo_connected=(servo is not None)
+        servo_connected=(servo is not None),
+        servo_error=servo_error
     )
 
 @app.route('/api/joke')
@@ -885,7 +893,8 @@ def api_servo_status():
     """Get servo connection status."""
     return jsonify({
         'connected': servo is not None,
-        'gpio_pin': GPIO_PIN if servo else None
+        'gpio_pin': GPIO_PIN if servo else None,
+        'error': servo_error
     })
 
 @app.route('/api/servo/angle')
