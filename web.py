@@ -586,7 +586,7 @@ HTML_TEMPLATE = '''
             fetch('/api/servo/release').catch(() => {});
         }
 
-        function speak(text, onEnd = null, isLaugh = false) {
+        function speak(text, onEnd = null, isLaugh = false, skipServo = false) {
             if (!soundEnabled || !('speechSynthesis' in window)) {
                 if (onEnd) onEnd();
                 return;
@@ -603,14 +603,14 @@ HTML_TEMPLATE = '''
             const indicator = document.getElementById('speakingIndicator');
             indicator.classList.add('active');
             
-            // Estimate duration for servo animation (rough: ~100ms per character at 0.9 rate)
-            const estimatedDuration = Math.max(1, text.length * 0.08);
-            
-            // Trigger servo animation
-            if (isLaugh) {
-                triggerServoLaugh();
-            } else {
-                triggerServoTalk(estimatedDuration);
+            // Trigger servo animation (unless already triggered externally)
+            if (!skipServo) {
+                const estimatedDuration = Math.max(1, text.length * 0.08);
+                if (isLaugh) {
+                    triggerServoLaugh();
+                } else {
+                    triggerServoTalk(estimatedDuration);
+                }
             }
             
             utterance.onend = () => {
@@ -652,22 +652,29 @@ HTML_TEMPLATE = '''
             document.getElementById('punchline').classList.add('revealed');
             
             const punchline = document.getElementById('punchline').textContent;
+            const estimatedDuration = Math.max(1, punchline.length * 0.08);
             
-            // Speak the punchline, then laugh
-            speak(punchline, () => {
+            // Always trigger servo for punchline (regardless of sound)
+            triggerServoTalk(estimatedDuration);
+            
+            if (soundEnabled) {
+                // Speak the punchline, then laugh
+                speak(punchline, () => {
+                    setTimeout(() => {
+                        document.getElementById('laugh').classList.add('visible');
+                        createConfetti();
+                        triggerServoLaugh();
+                        speak("Ha ha ha ha! That's a good one!", null, true);
+                    }, 300);
+                }, false, true);  // skipServo = true since we already triggered it
+            } else {
+                // No sound - just animate servo and show laugh
                 setTimeout(() => {
+                    triggerServoRelease();
                     document.getElementById('laugh').classList.add('visible');
                     createConfetti();
-                    speak("Ha ha ha ha! That's a good one!", null, true);
-                }, 300);
-            });
-            
-            // If sound is off, just show the laugh immediately
-            if (!soundEnabled) {
-                setTimeout(() => {
-                    document.getElementById('laugh').classList.add('visible');
-                    createConfetti();
-                }, 300);
+                    triggerServoLaugh();
+                }, estimatedDuration * 1000);
             }
         }
 
@@ -687,8 +694,17 @@ HTML_TEMPLATE = '''
                     document.getElementById('revealBtn').classList.remove('hidden');
                     document.getElementById('laugh').classList.remove('visible');
                     
-                    // Speak the new setup
-                    speak(data.setup);
+                    // Always animate servo for setup (even without sound)
+                    const estimatedDuration = Math.max(1, data.setup.length * 0.08);
+                    triggerServoTalk(estimatedDuration);
+                    
+                    if (soundEnabled) {
+                        // Speak the new setup (skip servo since we triggered it above)
+                        speak(data.setup, null, false, true);
+                    } else {
+                        // No sound - just release servo after animation
+                        setTimeout(() => triggerServoRelease(), estimatedDuration * 1000);
+                    }
                 });
         }
 
