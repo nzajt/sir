@@ -158,7 +158,10 @@ tts_lock = threading.Lock()
 
 def check_tts_available():
     """Check which TTS engine is available."""
-    if shutil.which('espeak'):
+    # Prefer pico2wave (more natural) over espeak (robotic)
+    if shutil.which('pico2wave'):
+        return 'pico2wave'
+    elif shutil.which('espeak'):
         return 'espeak'
     elif shutil.which('say'):
         return 'say'
@@ -181,7 +184,15 @@ def speak_text_sync(text, is_laugh=False):
             if is_laugh:
                 text = "Ha ha ha ha! That's a good one!"
             
-            if tts_command == 'espeak':
+            if tts_command == 'pico2wave':
+                # pico2wave outputs to a file, then we play it with aplay
+                import tempfile
+                with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as f:
+                    wav_file = f.name
+                subprocess.run(['pico2wave', '-l', 'en-US', '-w', wav_file, text], check=False)
+                subprocess.run(['aplay', '-q', wav_file], check=False)
+                os.unlink(wav_file)
+            elif tts_command == 'espeak':
                 # -a 200 = max volume, -s 120 = slower speed, -g 10 = gaps between words
                 subprocess.run(['espeak', '-a', '200', '-s', '120', '-g', '10', text], check=False)
             elif tts_command == 'say':

@@ -145,7 +145,10 @@ def get_random_joke(jokes):
 
 
 def check_tts_available():
-    if shutil.which('say'):
+    # Prefer pico2wave (more natural) over espeak (robotic)
+    if shutil.which('pico2wave'):
+        return 'pico2wave'
+    elif shutil.which('say'):
         return 'say'
     elif shutil.which('espeak'):
         return 'espeak'
@@ -153,9 +156,35 @@ def check_tts_available():
         return None
 
 
+def speak_with_pico(text):
+    """Speak using pico2wave (more natural voice)."""
+    import tempfile
+    with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as f:
+        wav_file = f.name
+    subprocess.run(['pico2wave', '-l', 'en-US', '-w', wav_file, text], check=False)
+    subprocess.run(['aplay', '-q', wav_file], check=False)
+    os.unlink(wav_file)
+
 def speak_text(text, tts_cmd=None, is_laugh=False):
     """Speak text with synchronized mouth movement."""
-    if tts_cmd == 'say':
+    if tts_cmd == 'pico2wave':
+        if is_laugh:
+            if servo:
+                animation_thread = threading.Thread(target=laugh_animation)
+                animation_thread.start()
+            speak_with_pico("Ha ha ha ha! That's a good one!")
+            if servo:
+                animation_thread.join()
+        else:
+            if servo:
+                duration = max(1.0, len(text) / 8)
+                animation_thread = threading.Thread(target=mouth_talking_animation, args=(duration,))
+                animation_thread.start()
+            speak_with_pico(text)
+            if servo:
+                animation_thread.join()
+                
+    elif tts_cmd == 'say':
         if is_laugh:
             # Start laugh animation in parallel with speech
             if servo:
