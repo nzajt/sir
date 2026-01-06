@@ -16,6 +16,37 @@ _tts_lock = threading.Lock()
 # Cached TTS command
 _tts_command = None
 
+# Audio player: prefer paplay (PulseAudio) for system default output
+_audio_player = None
+
+
+def _get_audio_player():
+    """Get the best available audio player for WAV files."""
+    global _audio_player
+    if _audio_player is None:
+        # paplay uses PulseAudio and respects system default output
+        if shutil.which('paplay'):
+            _audio_player = 'paplay'
+        # aplay goes direct to ALSA (may default to HDMI)
+        elif shutil.which('aplay'):
+            _audio_player = 'aplay'
+        else:
+            _audio_player = None
+    return _audio_player
+
+
+def _play_wav(wav_file):
+    """Play a WAV file through the system default audio output."""
+    player = _get_audio_player()
+    if player == 'paplay':
+        # PulseAudio - uses system default output
+        subprocess.run(['paplay', wav_file], check=False)
+    elif player == 'aplay':
+        # ALSA - try to use default device
+        subprocess.run(['aplay', '-q', wav_file], check=False)
+    else:
+        print("⚠️  No audio player available (install pulseaudio)")
+
 
 def check_tts_available():
     """
@@ -38,8 +69,16 @@ def init_tts():
     """Initialize TTS and return the available engine."""
     global _tts_command
     _tts_command = check_tts_available()
+    audio_player = _get_audio_player()
+    
     if _tts_command:
         print(f"🔊 TTS initialized: {_tts_command}")
+        if audio_player == 'paplay':
+            print("🔊 Audio output: PulseAudio (system default)")
+        elif audio_player == 'aplay':
+            print("🔊 Audio output: ALSA (install pulseaudio for better routing)")
+        else:
+            print("⚠️  No audio player found")
     else:
         print("⚠️  No TTS available (install: sudo apt install libttspico-utils)")
     return _tts_command
@@ -71,13 +110,13 @@ def speak_with_pico(text):
     if shutil.which('sox'):
         amplified_file = wav_file + '_loud.wav'
         subprocess.run(['sox', wav_file, amplified_file, 'vol', '3.0'], check=False)
-        subprocess.run(['aplay', '-q', amplified_file], check=False)
+        _play_wav(amplified_file)
         try:
             os.unlink(amplified_file)
         except:
             pass
     else:
-        subprocess.run(['aplay', '-q', wav_file], check=False)
+        _play_wav(wav_file)
     
     try:
         os.unlink(wav_file)
@@ -92,8 +131,22 @@ def speak_with_espeak(text):
     Args:
         text: The text to speak
     """
-    # -a 200 = max volume, -s 120 = slower speed, -g 10 = gaps between words
-    subprocess.run(['espeak', '-a', '200', '-s', '120', '-g', '10', text], check=False)
+    # If paplay is available, output to WAV and play through PulseAudio
+    # This ensures audio goes to system default instead of HDMI
+    if _get_audio_player() == 'paplay':
+        with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as f:
+            wav_file = f.name
+        # -a 200 = max volume, -s 120 = slower speed, -g 10 = gaps between words
+        # -w outputs to WAV file instead of playing directly
+        subprocess.run(['espeak', '-a', '200', '-s', '120', '-g', '10', '-w', wav_file, text], check=False)
+        _play_wav(wav_file)
+        try:
+            os.unlink(wav_file)
+        except:
+            pass
+    else:
+        # Fall back to direct espeak output (may go to HDMI)
+        subprocess.run(['espeak', '-a', '200', '-s', '120', '-g', '10', text], check=False)
 
 
 def speak_with_say(text):
