@@ -57,12 +57,18 @@ try:
             self.pwm.value = 0
             self.pwm.close()
     
-    if SERVO_ENABLED:
+    # Only initialize servo in the main Flask process, not the reloader
+    # In debug mode, Flask runs twice - skip servo init in the reloader process
+    is_reloader = os.environ.get('WERKZEUG_RUN_MAIN') != 'true' and os.environ.get('FLASK_DEBUG') == '1'
+    
+    if SERVO_ENABLED and not is_reloader:
         servo = ServoController(GPIO_PIN)
         servo.set_angle(MOUTH_CLOSED)
         time.sleep(0.3)
         servo.release()
         print("🤖 Servo initialized on GPIO", GPIO_PIN)
+    elif is_reloader:
+        print("⏳ Skipping servo init in reloader process...")
         
 except Exception as e:
     servo = None
@@ -951,4 +957,5 @@ def api_servo_test():
     return jsonify({'status': 'ok', 'message': 'Test cycle started'})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # use_reloader=False prevents Flask from starting twice and causing "GPIO busy"
+    app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)
