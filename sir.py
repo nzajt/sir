@@ -180,7 +180,7 @@ def speak_text(text, tts_cmd=None, is_laugh=False):
             if servo:
                 animation_thread = threading.Thread(target=laugh_animation)
                 animation_thread.start()
-            subprocess.run(['espeak', 'Ha ha ha ha! That\'s a good one!'], check=False)
+            subprocess.run(['espeak', '-a', '200', '-s', '150', 'Ha ha ha ha! That\'s a good one!'], check=False)
             if servo:
                 animation_thread.join()
         else:
@@ -188,7 +188,7 @@ def speak_text(text, tts_cmd=None, is_laugh=False):
                 duration = max(1.0, len(text) / 8)  # espeak is a bit slower
                 animation_thread = threading.Thread(target=mouth_talking_animation, args=(duration,))
                 animation_thread.start()
-            subprocess.run(['espeak', text], check=False)
+            subprocess.run(['espeak', '-a', '200', '-s', '150', text], check=False)
             if servo:
                 animation_thread.join()
 
