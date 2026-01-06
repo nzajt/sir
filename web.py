@@ -447,6 +447,53 @@ HTML_TEMPLATE = '''
             color: #f87171;
         }
 
+        .servo-controls {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .servo-controls-title {
+            font-size: 1rem;
+            color: #a2d5f2;
+            margin-bottom: 0.75rem;
+        }
+
+        .servo-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-servo {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.9rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+        }
+
+        .btn-servo:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: rgba(255,255,255,0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-servo:active {
+            transform: translateY(0);
+            background: rgba(83, 52, 131, 0.5);
+        }
+
+        .servo-angle {
+            font-size: 0.85rem;
+            color: #ffd93d;
+            margin-top: 0.5rem;
+        }
+
         .footer {
             margin-top: 3rem;
             color: rgba(255,255,255,0.4);
@@ -534,6 +581,17 @@ HTML_TEMPLATE = '''
             🤖 Servo: {{ 'Connected' if servo_connected else 'Not connected' }}
         </p>
 
+        <!-- Servo Test Controls -->
+        <div class="servo-controls">
+            <p class="servo-controls-title">🔧 Servo Test</p>
+            <div class="servo-buttons">
+                <button class="btn btn-servo" onclick="servoUp()">⬆️ Mouth Open</button>
+                <button class="btn btn-servo" onclick="servoDown()">⬇️ Mouth Closed</button>
+                <button class="btn btn-servo" onclick="servoTest()">🔄 Test Cycle</button>
+            </div>
+            <p class="servo-angle" id="servoAngle">Angle: --</p>
+        </div>
+
         <footer class="footer">
             <p>The Boredom Buster Bot • Built for science fairs & Raspberry Pi 5</p>
         </footer>
@@ -584,6 +642,37 @@ HTML_TEMPLATE = '''
         function triggerServoRelease() {
             if (!servoConnected) return;
             fetch('/api/servo/release').catch(() => {});
+        }
+
+        function setServoAngle(angle) {
+            fetch('/api/servo/angle?angle=' + angle)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('servoAngle').textContent = 'Angle: ' + angle + '°';
+                })
+                .catch(() => {
+                    document.getElementById('servoAngle').textContent = 'Error!';
+                });
+        }
+
+        function servoUp() {
+            setServoAngle(0);  // Mouth open
+        }
+
+        function servoDown() {
+            setServoAngle(90);  // Mouth closed
+        }
+
+        function servoTest() {
+            document.getElementById('servoAngle').textContent = 'Testing...';
+            fetch('/api/servo/test')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('servoAngle').textContent = 'Test complete!';
+                })
+                .catch(() => {
+                    document.getElementById('servoAngle').textContent = 'Error!';
+                });
         }
 
         function speak(text, onEnd = null, isLaugh = false, skipServo = false) {
@@ -798,6 +887,59 @@ def api_servo_status():
         'connected': servo is not None,
         'gpio_pin': GPIO_PIN if servo else None
     })
+
+@app.route('/api/servo/angle')
+def api_servo_angle():
+    """Set servo to a specific angle."""
+    if not servo:
+        return jsonify({'status': 'no_servo', 'error': 'Servo not connected'})
+    
+    try:
+        angle = int(request.args.get('angle', 90))
+        angle = max(0, min(180, angle))
+        
+        with servo_lock:
+            servo.set_angle(angle)
+        
+        return jsonify({'status': 'ok', 'angle': angle})
+    except Exception as e:
+        return jsonify({'status': 'error', 'error': str(e)})
+
+@app.route('/api/servo/test')
+def api_servo_test():
+    """Run a servo test cycle."""
+    if not servo:
+        return jsonify({'status': 'no_servo', 'error': 'Servo not connected'})
+    
+    def test_cycle():
+        with servo_lock:
+            # Move to closed (90°)
+            servo.set_angle(MOUTH_CLOSED)
+        time.sleep(0.5)
+        
+        with servo_lock:
+            # Move to open (0°)
+            servo.set_angle(MOUTH_OPEN)
+        time.sleep(0.5)
+        
+        with servo_lock:
+            # Move to half (45°)
+            servo.set_angle(MOUTH_HALF)
+        time.sleep(0.5)
+        
+        with servo_lock:
+            # Back to closed
+            servo.set_angle(MOUTH_CLOSED)
+        time.sleep(0.3)
+        
+        with servo_lock:
+            servo.release()
+    
+    # Run test in background thread
+    thread = threading.Thread(target=test_cycle)
+    thread.start()
+    
+    return jsonify({'status': 'ok', 'message': 'Test cycle started'})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
