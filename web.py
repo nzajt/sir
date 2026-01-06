@@ -4,6 +4,8 @@ from flask import Flask, render_template_string, jsonify, request
 import json
 import os
 import random
+import shutil
+import subprocess
 import threading
 import time
 
@@ -148,6 +150,49 @@ def laugh_animation():
     time.sleep(0.2)
     with servo_lock:
         servo.release()
+
+
+# Text-to-speech configuration
+tts_command = None
+tts_lock = threading.Lock()
+
+def check_tts_available():
+    """Check which TTS engine is available."""
+    if shutil.which('espeak'):
+        return 'espeak'
+    elif shutil.which('say'):
+        return 'say'
+    return None
+
+# Initialize TTS
+tts_command = check_tts_available()
+if tts_command:
+    print(f"🔊 TTS initialized: {tts_command}")
+else:
+    print("⚠️  No TTS available (install espeak: sudo apt install espeak)")
+
+def speak_text_sync(text, is_laugh=False):
+    """Speak text using system TTS (blocking)."""
+    if not tts_command:
+        return
+    
+    with tts_lock:
+        try:
+            if is_laugh:
+                text = "Ha ha ha ha! That's a good one!"
+            
+            if tts_command == 'espeak':
+                subprocess.run(['espeak', text], check=False)
+            elif tts_command == 'say':
+                subprocess.run(['say', '-v', 'Fred', text], check=False)
+        except Exception as e:
+            print(f"TTS error: {e}")
+
+def speak_text_async(text, is_laugh=False):
+    """Speak text in a background thread."""
+    thread = threading.Thread(target=speak_text_sync, args=(text, is_laugh))
+    thread.start()
+    return thread
 
 
 def load_jokes():
@@ -593,6 +638,9 @@ HTML_TEMPLATE = '''
             <br><span style="font-size: 0.8rem; color: #f87171;">Error: {{ servo_error }}</span>
             {% endif %}
         </p>
+        <p class="servo-status {{ 'connected' if tts_available else 'disconnected' }}">
+            🔊 TTS: {{ tts_engine if tts_available else 'Not available (install espeak)' }}
+        </p>
 
         <!-- Servo Test Controls -->
         <div class="servo-controls">
@@ -613,33 +661,8 @@ HTML_TEMPLATE = '''
     <script>
         let punchlineRevealed = false;
         let soundEnabled = false;
-        let selectedVoice = null;
         const servoConnected = {{ 'true' if servo_connected else 'false' }};
-
-        // Initialize speech synthesis and find a good "dad" voice
-        function initVoices() {
-            const voices = speechSynthesis.getVoices();
-            // Prefer deeper/male voices for the dad effect
-            const preferredVoices = ['Daniel', 'Fred', 'Alex', 'Ralph', 'Albert', 'Bruce', 'Google UK English Male', 'Microsoft David', 'en-US', 'en-GB'];
-            
-            for (const preferred of preferredVoices) {
-                const found = voices.find(v => v.name.includes(preferred) || v.lang.includes(preferred));
-                if (found) {
-                    selectedVoice = found;
-                    break;
-                }
-            }
-            // Fallback to first English voice or any voice
-            if (!selectedVoice) {
-                selectedVoice = voices.find(v => v.lang.startsWith('en')) || voices[0];
-            }
-        }
-
-        // Chrome loads voices asynchronously
-        if (speechSynthesis.onvoiceschanged !== undefined) {
-            speechSynthesis.onvoiceschanged = initVoices;
-        }
-        initVoices();
+        const ttsAvailable = {{ 'true' if tts_available else 'false' }};
 
         // Servo control functions
         function triggerServoTalk(duration) {
@@ -689,25 +712,19 @@ HTML_TEMPLATE = '''
         }
 
         function speak(text, onEnd = null, isLaugh = false, skipServo = false) {
-            if (!soundEnabled || !('speechSynthesis' in window)) {
+            if (!soundEnabled) {
                 if (onEnd) onEnd();
                 return;
             }
             
-            // Cancel any ongoing speech
-            speechSynthesis.cancel();
-            
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.voice = selectedVoice;
-            utterance.rate = 0.9;  // Slightly slower for dad delivery
-            utterance.pitch = 0.9; // Slightly lower pitch
-            
             const indicator = document.getElementById('speakingIndicator');
             indicator.classList.add('active');
             
+            // Estimate speech duration (rough: ~80ms per character for espeak)
+            const estimatedDuration = Math.max(1, text.length * 0.08);
+            
             // Trigger servo animation (unless already triggered externally)
             if (!skipServo) {
-                const estimatedDuration = Math.max(1, text.length * 0.08);
                 if (isLaugh) {
                     triggerServoLaugh();
                 } else {
@@ -715,17 +732,29 @@ HTML_TEMPLATE = '''
                 }
             }
             
-            utterance.onend = () => {
-                indicator.classList.remove('active');
-                triggerServoRelease();
-                if (onEnd) onEnd();
-            };
-            utterance.onerror = () => {
-                indicator.classList.remove('active');
-                triggerServoRelease();
-            };
+            // Call server-side TTS (Pi's speakers via espeak)
+            let url;
+            if (isLaugh) {
+                url = '/api/speak/laugh';
+            } else {
+                url = '/api/speak?text=' + encodeURIComponent(text);
+            }
             
-            speechSynthesis.speak(utterance);
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    // Wait for estimated speech duration before calling onEnd
+                    setTimeout(() => {
+                        indicator.classList.remove('active');
+                        triggerServoRelease();
+                        if (onEnd) onEnd();
+                    }, estimatedDuration * 1000);
+                })
+                .catch(() => {
+                    indicator.classList.remove('active');
+                    triggerServoRelease();
+                    if (onEnd) onEnd();
+                });
         }
 
         function toggleSound() {
@@ -853,7 +882,9 @@ def index():
         punchline=joke['punchline'],
         total_jokes=len(JOKES),
         servo_connected=(servo is not None),
-        servo_error=servo_error
+        servo_error=servo_error,
+        tts_available=(tts_command is not None),
+        tts_engine=tts_command
     )
 
 @app.route('/api/joke')
@@ -955,6 +986,38 @@ def api_servo_test():
     thread.start()
     
     return jsonify({'status': 'ok', 'message': 'Test cycle started'})
+
+@app.route('/api/speak')
+def api_speak():
+    """Speak text through Pi's speakers."""
+    text = request.args.get('text', '')
+    if not text:
+        return jsonify({'status': 'error', 'error': 'No text provided'})
+    
+    if not tts_command:
+        return jsonify({'status': 'no_tts', 'error': 'No TTS engine available'})
+    
+    # Speak in background thread
+    speak_text_async(text)
+    return jsonify({'status': 'ok', 'text': text})
+
+@app.route('/api/speak/laugh')
+def api_speak_laugh():
+    """Speak the laugh through Pi's speakers."""
+    if not tts_command:
+        return jsonify({'status': 'no_tts', 'error': 'No TTS engine available'})
+    
+    # Speak laugh in background thread
+    speak_text_async("", is_laugh=True)
+    return jsonify({'status': 'ok'})
+
+@app.route('/api/tts/status')
+def api_tts_status():
+    """Get TTS status."""
+    return jsonify({
+        'available': tts_command is not None,
+        'engine': tts_command
+    })
 
 if __name__ == '__main__':
     # use_reloader=False prevents Flask from starting twice and causing "GPIO busy"
