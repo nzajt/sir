@@ -1,14 +1,144 @@
 #!/usr/bin/env python3
 
-from flask import Flask, render_template_string, jsonify
+from flask import Flask, render_template_string, jsonify, request
 import json
 import os
 import random
+import threading
+import time
 
 app = Flask(__name__)
 
 # Get the directory where this script lives
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Servo configuration
+SERVO_ENABLED = True
+GPIO_PIN = 18
+MOUTH_CLOSED = 90   # Degrees when mouth is closed
+MOUTH_OPEN = 0      # Degrees when mouth is fully open
+MOUTH_HALF = 45     # Degrees for half-open mouth
+
+# Try to import servo control (only works on Raspberry Pi)
+servo = None
+servo_lock = threading.Lock()
+
+try:
+    os.environ['GPIOZERO_PIN_FACTORY'] = 'lgpio'
+    from gpiozero import PWMOutputDevice
+    
+    class ServoController:
+        """Simple servo controller for mouth movement."""
+        
+        def __init__(self, gpio_pin, min_duty=0.025, max_duty=0.125, freq=50):
+            self.gpio = gpio_pin
+            self.min_duty = min_duty
+            self.max_duty = max_duty
+            self.pwm = PWMOutputDevice(gpio_pin, frequency=freq, initial_value=0)
+            self.current_angle = None
+        
+        def angle_to_duty(self, angle):
+            angle = max(0, min(180, angle))
+            duty_range = self.max_duty - self.min_duty
+            return self.min_duty + (angle / 180.0) * duty_range
+        
+        def set_angle(self, angle):
+            """Move servo to angle (0-180)."""
+            angle = max(0, min(180, angle))
+            self.pwm.value = self.angle_to_duty(angle)
+            self.current_angle = angle
+        
+        def release(self):
+            """Stop PWM signal."""
+            self.pwm.value = 0
+        
+        def cleanup(self):
+            self.pwm.value = 0
+            self.pwm.close()
+    
+    if SERVO_ENABLED:
+        servo = ServoController(GPIO_PIN)
+        servo.set_angle(MOUTH_CLOSED)
+        time.sleep(0.3)
+        servo.release()
+        print("🤖 Servo initialized on GPIO", GPIO_PIN)
+        
+except Exception as e:
+    servo = None
+    print(f"Note: Servo not available ({e})")
+    print("Running without servo control.")
+
+
+def move_mouth(angle):
+    """Move servo to specified angle if available."""
+    if servo:
+        with servo_lock:
+            servo.set_angle(angle)
+
+
+def mouth_talking_animation(duration=2.0):
+    """Animate mouth while talking (open/close pattern)."""
+    if not servo:
+        return
+    
+    start_time = time.time()
+    while time.time() - start_time < duration:
+        with servo_lock:
+            servo.set_angle(MOUTH_OPEN)
+        time.sleep(0.15)
+        with servo_lock:
+            servo.set_angle(MOUTH_CLOSED)
+        time.sleep(0.1)
+    
+    with servo_lock:
+        servo.set_angle(MOUTH_CLOSED)
+        servo.release()
+
+
+def laugh_animation():
+    """
+    Animate mouth for laughing: Ha ha ha ha!
+    Pattern: closed → open → half → open → half → open → closed
+    """
+    if not servo:
+        return
+    
+    with servo_lock:
+        # Ha
+        servo.set_angle(MOUTH_OPEN)
+    time.sleep(0.2)
+    with servo_lock:
+        servo.set_angle(MOUTH_HALF)
+    time.sleep(0.15)
+    
+    # ha
+    with servo_lock:
+        servo.set_angle(MOUTH_OPEN)
+    time.sleep(0.2)
+    with servo_lock:
+        servo.set_angle(MOUTH_HALF)
+    time.sleep(0.15)
+    
+    # ha
+    with servo_lock:
+        servo.set_angle(MOUTH_OPEN)
+    time.sleep(0.2)
+    with servo_lock:
+        servo.set_angle(MOUTH_HALF)
+    time.sleep(0.15)
+    
+    # ha!
+    with servo_lock:
+        servo.set_angle(MOUTH_OPEN)
+    time.sleep(0.3)
+    
+    # Close mouth
+    with servo_lock:
+        servo.set_angle(MOUTH_CLOSED)
+    time.sleep(0.2)
+    with servo_lock:
+        servo.release()
+
 
 def load_jokes():
     jokes_path = os.path.join(SCRIPT_DIR, 'dad_jokes.json')
@@ -304,6 +434,19 @@ HTML_TEMPLATE = '''
             50% { transform: scale(1.2); }
         }
 
+        .servo-status {
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+        }
+
+        .servo-status.connected {
+            color: #4ade80;
+        }
+
+        .servo-status.disconnected {
+            color: #f87171;
+        }
+
         .footer {
             margin-top: 3rem;
             color: rgba(255,255,255,0.4);
@@ -383,7 +526,13 @@ HTML_TEMPLATE = '''
             </button>
         </div>
 
-        <p class="stats">Serving {{ total_jokes }} premium dad jokes <span class="speaking-indicator" id="speakingIndicator">🗣️</span></p>
+        <p class="stats">
+            Serving {{ total_jokes }} premium dad jokes 
+            <span class="speaking-indicator" id="speakingIndicator">🗣️</span>
+        </p>
+        <p class="servo-status {{ 'connected' if servo_connected else 'disconnected' }}" id="servoStatus">
+            🤖 Servo: {{ 'Connected' if servo_connected else 'Not connected' }}
+        </p>
 
         <footer class="footer">
             <p>The Boredom Buster Bot • Built for science fairs & Raspberry Pi 5</p>
@@ -394,6 +543,7 @@ HTML_TEMPLATE = '''
         let punchlineRevealed = false;
         let soundEnabled = false;
         let selectedVoice = null;
+        const servoConnected = {{ 'true' if servo_connected else 'false' }};
 
         // Initialize speech synthesis and find a good "dad" voice
         function initVoices() {
@@ -420,8 +570,27 @@ HTML_TEMPLATE = '''
         }
         initVoices();
 
-        function speak(text, onEnd = null) {
-            if (!soundEnabled || !('speechSynthesis' in window)) return;
+        // Servo control functions
+        function triggerServoTalk(duration) {
+            if (!servoConnected) return;
+            fetch('/api/servo/talk?duration=' + duration).catch(() => {});
+        }
+
+        function triggerServoLaugh() {
+            if (!servoConnected) return;
+            fetch('/api/servo/laugh').catch(() => {});
+        }
+
+        function triggerServoRelease() {
+            if (!servoConnected) return;
+            fetch('/api/servo/release').catch(() => {});
+        }
+
+        function speak(text, onEnd = null, isLaugh = false) {
+            if (!soundEnabled || !('speechSynthesis' in window)) {
+                if (onEnd) onEnd();
+                return;
+            }
             
             // Cancel any ongoing speech
             speechSynthesis.cancel();
@@ -434,12 +603,24 @@ HTML_TEMPLATE = '''
             const indicator = document.getElementById('speakingIndicator');
             indicator.classList.add('active');
             
+            // Estimate duration for servo animation (rough: ~100ms per character at 0.9 rate)
+            const estimatedDuration = Math.max(1, text.length * 0.08);
+            
+            // Trigger servo animation
+            if (isLaugh) {
+                triggerServoLaugh();
+            } else {
+                triggerServoTalk(estimatedDuration);
+            }
+            
             utterance.onend = () => {
                 indicator.classList.remove('active');
+                triggerServoRelease();
                 if (onEnd) onEnd();
             };
             utterance.onerror = () => {
                 indicator.classList.remove('active');
+                triggerServoRelease();
             };
             
             speechSynthesis.speak(utterance);
@@ -459,6 +640,7 @@ HTML_TEMPLATE = '''
                 btn.classList.remove('active');
                 speechSynthesis.cancel();
                 document.getElementById('speakingIndicator').classList.remove('active');
+                triggerServoRelease();
             }
         }
 
@@ -476,7 +658,7 @@ HTML_TEMPLATE = '''
                 setTimeout(() => {
                     document.getElementById('laugh').classList.add('visible');
                     createConfetti();
-                    speak("Ha ha ha ha! That's a good one!");
+                    speak("Ha ha ha ha! That's a good one!", null, true);
                 }, 300);
             });
             
@@ -492,6 +674,7 @@ HTML_TEMPLATE = '''
         function getNewJoke() {
             // Cancel any ongoing speech
             speechSynthesis.cancel();
+            triggerServoRelease();
             
             fetch('/api/joke')
                 .then(response => response.json())
@@ -550,7 +733,8 @@ def index():
         HTML_TEMPLATE,
         setup=joke['setup'],
         punchline=joke['punchline'],
-        total_jokes=len(JOKES)
+        total_jokes=len(JOKES),
+        servo_connected=(servo is not None)
     )
 
 @app.route('/api/joke')
@@ -558,6 +742,46 @@ def api_joke():
     joke = random.choice(JOKES)
     return jsonify(joke)
 
+@app.route('/api/servo/talk')
+def api_servo_talk():
+    """Trigger talking mouth animation."""
+    if not servo:
+        return jsonify({'status': 'no_servo'})
+    
+    duration = float(request.args.get('duration', 2.0))
+    # Run animation in background thread so it doesn't block
+    thread = threading.Thread(target=mouth_talking_animation, args=(duration,))
+    thread.start()
+    return jsonify({'status': 'ok', 'duration': duration})
+
+@app.route('/api/servo/laugh')
+def api_servo_laugh():
+    """Trigger laugh animation."""
+    if not servo:
+        return jsonify({'status': 'no_servo'})
+    
+    # Run animation in background thread
+    thread = threading.Thread(target=laugh_animation)
+    thread.start()
+    return jsonify({'status': 'ok'})
+
+@app.route('/api/servo/release')
+def api_servo_release():
+    """Release the servo."""
+    if not servo:
+        return jsonify({'status': 'no_servo'})
+    
+    with servo_lock:
+        servo.release()
+    return jsonify({'status': 'ok'})
+
+@app.route('/api/servo/status')
+def api_servo_status():
+    """Get servo connection status."""
+    return jsonify({
+        'connected': servo is not None,
+        'gpio_pin': GPIO_PIN if servo else None
+    })
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
-
