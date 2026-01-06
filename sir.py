@@ -4,126 +4,30 @@ import json
 import os
 import random
 import sys
-import subprocess
-import shutil
-import time
 import threading
+import time
 
 # Get the directory where this script lives
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Servo configuration
-SERVO_ENABLED = True
-GPIO_PIN = 18
-MOUTH_CLOSED = 90   # Degrees when mouth is closed
-MOUTH_OPEN = 0      # Degrees when mouth is fully open
-MOUTH_HALF = 45     # Degrees for half-open mouth
+# Add lib to path for imports
+sys.path.insert(0, SCRIPT_DIR)
 
-# Try to import servo control (only works on Raspberry Pi)
-servo = None
-try:
-    os.environ['GPIOZERO_PIN_FACTORY'] = 'lgpio'
-    from gpiozero import PWMOutputDevice
-    
-    class ServoController:
-        """Simple servo controller for mouth movement."""
-        
-        def __init__(self, gpio_pin, min_duty=0.025, max_duty=0.125, freq=50):
-            self.gpio = gpio_pin
-            self.min_duty = min_duty
-            self.max_duty = max_duty
-            self.pwm = PWMOutputDevice(gpio_pin, frequency=freq, initial_value=0)
-            self.current_angle = None
-        
-        def angle_to_duty(self, angle):
-            angle = max(0, min(180, angle))
-            duty_range = self.max_duty - self.min_duty
-            return self.min_duty + (angle / 180.0) * duty_range
-        
-        def set_angle(self, angle):
-            """Move servo to angle (0-180)."""
-            angle = max(0, min(180, angle))
-            self.pwm.value = self.angle_to_duty(angle)
-            self.current_angle = angle
-        
-        def release(self):
-            """Stop PWM signal."""
-            self.pwm.value = 0
-        
-        def cleanup(self):
-            self.pwm.value = 0
-            self.pwm.close()
-    
-    if SERVO_ENABLED:
-        servo = ServoController(GPIO_PIN)
-        servo.set_angle(MOUTH_CLOSED)
-        time.sleep(0.3)
-        servo.release()
-        
-except Exception as e:
-    servo = None
-    # Only show warning if servo was supposed to be enabled
-    if SERVO_ENABLED and '--speak' in sys.argv or '-s' in sys.argv:
-        print(f"Note: Servo not available ({e})")
-        print("Running without servo control.\n")
+from bbb.servo import (
+    init_servo,
+    get_servo,
+    move_mouth,
+    mouth_talking_animation,
+    laugh_animation,
+    MOUTH_CLOSED,
+)
+from bbb.tts import (
+    check_tts_available,
+    speak_text_sync,
+)
 
-
-def move_mouth(angle):
-    """Move servo to specified angle if available."""
-    if servo:
-        servo.set_angle(angle)
-
-
-def mouth_talking_animation(duration=0.5):
-    """Animate mouth while talking (open/close pattern)."""
-    if not servo:
-        return
-    
-    start_time = time.time()
-    while time.time() - start_time < duration:
-        move_mouth(MOUTH_OPEN)
-        time.sleep(0.15)
-        move_mouth(MOUTH_CLOSED)
-        time.sleep(0.1)
-    
-    move_mouth(MOUTH_CLOSED)
-    servo.release()
-
-
-def laugh_animation():
-    """
-    Animate mouth for laughing: Ha ha ha ha!
-    Pattern: closed → open → half → open → half → open → closed
-    """
-    if not servo:
-        return
-    
-    # Ha
-    move_mouth(MOUTH_OPEN)
-    time.sleep(0.2)
-    move_mouth(MOUTH_HALF)
-    time.sleep(0.15)
-    
-    # ha
-    move_mouth(MOUTH_OPEN)
-    time.sleep(0.2)
-    move_mouth(MOUTH_HALF)
-    time.sleep(0.15)
-    
-    # ha
-    move_mouth(MOUTH_OPEN)
-    time.sleep(0.2)
-    move_mouth(MOUTH_HALF)
-    time.sleep(0.15)
-    
-    # ha!
-    move_mouth(MOUTH_OPEN)
-    time.sleep(0.3)
-    
-    # Close mouth
-    move_mouth(MOUTH_CLOSED)
-    time.sleep(0.2)
-    servo.release()
+# Initialize servo
+servo, servo_error = init_servo()
 
 
 def load_jokes():
@@ -144,35 +48,14 @@ def get_random_joke(jokes):
     return random.choice(jokes)
 
 
-def check_tts_available():
-    # Prefer pico2wave (more natural) over espeak (robotic)
-    if shutil.which('pico2wave'):
-        return 'pico2wave'
-    elif shutil.which('say'):
-        return 'say'
-    elif shutil.which('espeak'):
-        return 'espeak'
-    else:
-        return None
-
-
-def speak_with_pico(text):
-    """Speak using pico2wave (more natural voice)."""
-    import tempfile
-    with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as f:
-        wav_file = f.name
-    subprocess.run(['pico2wave', '-l', 'en-US', '-w', wav_file, text], check=False)
-    subprocess.run(['aplay', '-q', wav_file], check=False)
-    os.unlink(wav_file)
-
 def speak_text(text, tts_cmd=None, is_laugh=False):
     """Speak text with synchronized mouth movement."""
-    if tts_cmd == 'pico2wave':
+    if tts_cmd == 'pico2wave' or tts_cmd == 'espeak':
         if is_laugh:
             if servo:
                 animation_thread = threading.Thread(target=laugh_animation)
                 animation_thread.start()
-            speak_with_pico("Ha ha ha ha! That's a good one!")
+            speak_text_sync("", is_laugh=True, tts_cmd=tts_cmd)
             if servo:
                 animation_thread.join()
         else:
@@ -180,44 +63,24 @@ def speak_text(text, tts_cmd=None, is_laugh=False):
                 duration = max(1.0, len(text) / 8)
                 animation_thread = threading.Thread(target=mouth_talking_animation, args=(duration,))
                 animation_thread.start()
-            speak_with_pico(text)
+            speak_text_sync(text, tts_cmd=tts_cmd)
             if servo:
                 animation_thread.join()
                 
     elif tts_cmd == 'say':
         if is_laugh:
-            # Start laugh animation in parallel with speech
             if servo:
                 animation_thread = threading.Thread(target=laugh_animation)
                 animation_thread.start()
-            subprocess.run(['say', '-v', 'Fred', 'Ha ha ha ha! That\'s a good one!'], check=False)
+            speak_text_sync("", is_laugh=True, tts_cmd=tts_cmd)
             if servo:
                 animation_thread.join()
         else:
-            # Animate mouth while speaking
             if servo:
-                # Estimate speech duration (rough: 10 chars per second)
                 duration = max(1.0, len(text) / 10)
                 animation_thread = threading.Thread(target=mouth_talking_animation, args=(duration,))
                 animation_thread.start()
-            subprocess.run(['say', '-v', 'Fred', text], check=False)
-            if servo:
-                animation_thread.join()
-                
-    elif tts_cmd == 'espeak':
-        if is_laugh:
-            if servo:
-                animation_thread = threading.Thread(target=laugh_animation)
-                animation_thread.start()
-            subprocess.run(['espeak', '-a', '200', '-s', '120', '-g', '10', 'Ha ha ha ha! That\'s a good one!'], check=False)
-            if servo:
-                animation_thread.join()
-        else:
-            if servo:
-                duration = max(1.0, len(text) / 8)  # espeak is a bit slower
-                animation_thread = threading.Thread(target=mouth_talking_animation, args=(duration,))
-                animation_thread.start()
-            subprocess.run(['espeak', '-a', '200', '-s', '120', '-g', '10', text], check=False)
+            speak_text_sync(text, tts_cmd=tts_cmd)
             if servo:
                 animation_thread.join()
 

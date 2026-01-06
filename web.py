@@ -4,8 +4,8 @@ from flask import Flask, render_template_string, jsonify, request
 import json
 import os
 import random
-import shutil
 import subprocess
+import sys
 import threading
 import time
 
@@ -14,197 +14,35 @@ app = Flask(__name__)
 # Get the directory where this script lives
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Servo configuration
-SERVO_ENABLED = True
-GPIO_PIN = 18
-MOUTH_CLOSED = 90   # Degrees when mouth is closed
-MOUTH_OPEN = 0      # Degrees when mouth is fully open
-MOUTH_HALF = 45     # Degrees for half-open mouth
+# Add lib to path for imports
+sys.path.insert(0, SCRIPT_DIR)
 
-# Try to import servo control (only works on Raspberry Pi)
-servo = None
-servo_lock = threading.Lock()
-servo_error = None  # Store error message for debugging
+from bbb.servo import (
+    init_servo,
+    get_servo,
+    get_servo_lock,
+    get_servo_error,
+    move_mouth,
+    mouth_talking_animation,
+    laugh_animation,
+    MOUTH_CLOSED,
+    MOUTH_OPEN,
+    MOUTH_HALF,
+    GPIO_PIN,
+)
+from bbb.tts import (
+    init_tts,
+    get_tts_command,
+    speak_text_sync,
+    speak_text_async,
+)
 
-try:
-    os.environ['GPIOZERO_PIN_FACTORY'] = 'lgpio'
-    from gpiozero import PWMOutputDevice
-    
-    class ServoController:
-        """Simple servo controller for mouth movement."""
-        
-        def __init__(self, gpio_pin, min_duty=0.025, max_duty=0.125, freq=50):
-            self.gpio = gpio_pin
-            self.min_duty = min_duty
-            self.max_duty = max_duty
-            self.pwm = PWMOutputDevice(gpio_pin, frequency=freq, initial_value=0)
-            self.current_angle = None
-        
-        def angle_to_duty(self, angle):
-            angle = max(0, min(180, angle))
-            duty_range = self.max_duty - self.min_duty
-            return self.min_duty + (angle / 180.0) * duty_range
-        
-        def set_angle(self, angle):
-            """Move servo to angle (0-180)."""
-            angle = max(0, min(180, angle))
-            self.pwm.value = self.angle_to_duty(angle)
-            self.current_angle = angle
-        
-        def release(self):
-            """Stop PWM signal."""
-            self.pwm.value = 0
-        
-        def cleanup(self):
-            self.pwm.value = 0
-            self.pwm.close()
-    
-    # Only initialize servo in the main Flask process, not the reloader
-    # In debug mode, Flask runs twice - skip servo init in the reloader process
-    is_reloader = os.environ.get('WERKZEUG_RUN_MAIN') != 'true' and os.environ.get('FLASK_DEBUG') == '1'
-    
-    if SERVO_ENABLED and not is_reloader:
-        servo = ServoController(GPIO_PIN)
-        servo.set_angle(MOUTH_CLOSED)
-        time.sleep(0.3)
-        servo.release()
-        print("🤖 Servo initialized on GPIO", GPIO_PIN)
-    elif is_reloader:
-        print("⏳ Skipping servo init in reloader process...")
-        
-except Exception as e:
-    servo = None
-    servo_error = str(e)
-    print(f"⚠️  Servo error: {e}")
-    print("Running without servo control.")
-    import traceback
-    traceback.print_exc()
-
-
-def move_mouth(angle):
-    """Move servo to specified angle if available."""
-    if servo:
-        with servo_lock:
-            servo.set_angle(angle)
-
-
-def mouth_talking_animation(duration=2.0):
-    """Animate mouth while talking (open/close pattern)."""
-    if not servo:
-        return
-    
-    start_time = time.time()
-    while time.time() - start_time < duration:
-        with servo_lock:
-            servo.set_angle(MOUTH_OPEN)
-        time.sleep(0.15)
-        with servo_lock:
-            servo.set_angle(MOUTH_CLOSED)
-        time.sleep(0.1)
-    
-    with servo_lock:
-        servo.set_angle(MOUTH_CLOSED)
-        servo.release()
-
-
-def laugh_animation():
-    """
-    Animate mouth for laughing: Ha ha ha ha!
-    Pattern: closed → open → half → open → half → open → closed
-    """
-    if not servo:
-        return
-    
-    with servo_lock:
-        # Ha
-        servo.set_angle(MOUTH_OPEN)
-    time.sleep(0.2)
-    with servo_lock:
-        servo.set_angle(MOUTH_HALF)
-    time.sleep(0.15)
-    
-    # ha
-    with servo_lock:
-        servo.set_angle(MOUTH_OPEN)
-    time.sleep(0.2)
-    with servo_lock:
-        servo.set_angle(MOUTH_HALF)
-    time.sleep(0.15)
-    
-    # ha
-    with servo_lock:
-        servo.set_angle(MOUTH_OPEN)
-    time.sleep(0.2)
-    with servo_lock:
-        servo.set_angle(MOUTH_HALF)
-    time.sleep(0.15)
-    
-    # ha!
-    with servo_lock:
-        servo.set_angle(MOUTH_OPEN)
-    time.sleep(0.3)
-    
-    # Close mouth
-    with servo_lock:
-        servo.set_angle(MOUTH_CLOSED)
-    time.sleep(0.2)
-    with servo_lock:
-        servo.release()
-
-
-# Text-to-speech configuration
-tts_command = None
-tts_lock = threading.Lock()
-
-def check_tts_available():
-    """Check which TTS engine is available."""
-    # Prefer pico2wave (more natural) over espeak (robotic)
-    if shutil.which('pico2wave'):
-        return 'pico2wave'
-    elif shutil.which('espeak'):
-        return 'espeak'
-    elif shutil.which('say'):
-        return 'say'
-    return None
+# Initialize servo (skip in Flask reloader process)
+servo, servo_error = init_servo(skip_if_reloader=True)
+servo_lock = get_servo_lock()
 
 # Initialize TTS
-tts_command = check_tts_available()
-if tts_command:
-    print(f"🔊 TTS initialized: {tts_command}")
-else:
-    print("⚠️  No TTS available (install espeak: sudo apt install espeak)")
-
-def speak_text_sync(text, is_laugh=False):
-    """Speak text using system TTS (blocking)."""
-    if not tts_command:
-        return
-    
-    with tts_lock:
-        try:
-            if is_laugh:
-                text = "Ha ha ha ha! That's a good one!"
-            
-            if tts_command == 'pico2wave':
-                # pico2wave outputs to a file, then we play it with aplay
-                import tempfile
-                with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as f:
-                    wav_file = f.name
-                subprocess.run(['pico2wave', '-l', 'en-US', '-w', wav_file, text], check=False)
-                subprocess.run(['aplay', '-q', wav_file], check=False)
-                os.unlink(wav_file)
-            elif tts_command == 'espeak':
-                # -a 200 = max volume, -s 120 = slower speed, -g 10 = gaps between words
-                subprocess.run(['espeak', '-a', '200', '-s', '120', '-g', '10', text], check=False)
-            elif tts_command == 'say':
-                subprocess.run(['say', '-v', 'Fred', text], check=False)
-        except Exception as e:
-            print(f"TTS error: {e}")
-
-def speak_text_async(text, is_laugh=False):
-    """Speak text in a background thread."""
-    thread = threading.Thread(target=speak_text_sync, args=(text, is_laugh))
-    thread.start()
-    return thread
+tts_command = init_tts()
 
 
 def load_jokes():
@@ -561,6 +399,48 @@ HTML_TEMPLATE = '''
             margin-top: 0.5rem;
         }
 
+        .volume-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .volume-slider {
+            width: 200px;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.2);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffd93d 0%, #ff6b6b 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(255, 217, 61, 0.4);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ffd93d 0%, #ff6b6b 100%);
+            cursor: pointer;
+            border: none;
+        }
+
+        #volumeValue {
+            font-size: 1.1rem;
+            color: #ffd93d;
+            min-width: 50px;
+        }
+
         .footer {
             margin-top: 3rem;
             color: rgba(255,255,255,0.4);
@@ -654,6 +534,17 @@ HTML_TEMPLATE = '''
             🔊 TTS: {{ tts_engine if tts_available else 'Not available (install espeak)' }}
         </p>
 
+        <!-- Volume Control -->
+        <div class="servo-controls">
+            <p class="servo-controls-title">🔊 Volume Control</p>
+            <div class="volume-control">
+                <input type="range" id="volumeSlider" min="0" max="100" value="100" 
+                       oninput="setVolume(this.value)" class="volume-slider">
+                <span id="volumeValue">100%</span>
+            </div>
+            <button class="btn btn-servo" onclick="setMaxVolume()">🔊 MAX VOLUME</button>
+        </div>
+
         <!-- Servo Test Controls -->
         <div class="servo-controls">
             <p class="servo-controls-title">🔧 Servo Test</p>
@@ -722,6 +613,22 @@ HTML_TEMPLATE = '''
                     document.getElementById('servoAngle').textContent = 'Error!';
                 });
         }
+
+        function setVolume(level) {
+            document.getElementById('volumeValue').textContent = level + '%';
+            fetch('/api/volume/set?level=' + level).catch(() => {});
+        }
+
+        function setMaxVolume() {
+            document.getElementById('volumeSlider').value = 100;
+            document.getElementById('volumeValue').textContent = '100%';
+            fetch('/api/volume/max').catch(() => {});
+        }
+
+        // Set volume to max on page load
+        window.addEventListener('load', () => {
+            setMaxVolume();
+        });
 
         function speak(text, onEnd = null, isLaugh = false, skipServo = false) {
             if (!soundEnabled) {
@@ -911,8 +818,8 @@ def api_servo_talk():
         return jsonify({'status': 'no_servo'})
     
     duration = float(request.args.get('duration', 2.0))
-    # Run animation in background thread so it doesn't block
-    thread = threading.Thread(target=mouth_talking_animation, args=(duration,))
+    # Run animation in background thread with locking
+    thread = threading.Thread(target=mouth_talking_animation, args=(duration, True))
     thread.start()
     return jsonify({'status': 'ok', 'duration': duration})
 
@@ -922,8 +829,8 @@ def api_servo_laugh():
     if not servo:
         return jsonify({'status': 'no_servo'})
     
-    # Run animation in background thread
-    thread = threading.Thread(target=laugh_animation)
+    # Run animation in background thread with locking
+    thread = threading.Thread(target=laugh_animation, args=(True,))
     thread.start()
     return jsonify({'status': 'ok'})
 
@@ -1030,6 +937,32 @@ def api_tts_status():
         'available': tts_command is not None,
         'engine': tts_command
     })
+
+@app.route('/api/volume/set')
+def api_volume_set():
+    """Set system volume (0-100)."""
+    volume = request.args.get('level', '100')
+    try:
+        vol = max(0, min(100, int(volume)))
+        # Try different volume controls (ALSA)
+        result = subprocess.run(['amixer', 'set', 'Master', f'{vol}%'], 
+                               capture_output=True, text=True)
+        if result.returncode != 0:
+            # Try PCM if Master doesn't work
+            subprocess.run(['amixer', 'set', 'PCM', f'{vol}%'], check=False)
+        return jsonify({'status': 'ok', 'volume': vol})
+    except Exception as e:
+        return jsonify({'status': 'error', 'error': str(e)})
+
+@app.route('/api/volume/max')
+def api_volume_max():
+    """Set system volume to maximum."""
+    try:
+        subprocess.run(['amixer', 'set', 'Master', '100%'], check=False)
+        subprocess.run(['amixer', 'set', 'PCM', '100%'], check=False)
+        return jsonify({'status': 'ok', 'volume': 100})
+    except Exception as e:
+        return jsonify({'status': 'error', 'error': str(e)})
 
 if __name__ == '__main__':
     # use_reloader=False prevents Flask from starting twice and causing "GPIO busy"
