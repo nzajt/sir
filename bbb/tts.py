@@ -112,7 +112,7 @@ def get_tts_lock():
 
 def speak_with_pico(text):
     """
-    Speak using pico2wave (more natural voice) with volume boost.
+    Speak using pico2wave (more natural voice) with volume boost and slower speed.
     
     Args:
         text: The text to speak
@@ -122,10 +122,11 @@ def speak_with_pico(text):
     
     subprocess.run(['pico2wave', '-l', 'en-US', '-w', wav_file, text], check=False)
     
-    # Amplify with sox if available (boost volume 3x)
+    # Process with sox if available (boost volume 3x, slow down to 85% speed)
     if shutil.which('sox'):
-        amplified_file = wav_file + '_loud.wav'
-        subprocess.run(['sox', wav_file, amplified_file, 'vol', '3.0'], check=False)
+        amplified_file = wav_file + '_processed.wav'
+        # vol 3.0 = 3x volume, tempo 0.85 = 85% speed (slower)
+        subprocess.run(['sox', wav_file, amplified_file, 'vol', '3.0', 'tempo', '0.85'], check=False)
         _play_wav(amplified_file)
         try:
             os.unlink(amplified_file)
@@ -154,9 +155,9 @@ def speak_with_espeak(text):
     if player in ['pw-play', 'paplay', 'ffplay']:
         with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as f:
             wav_file = f.name
-        # -a 200 = max volume, -s 120 = slower speed, -g 10 = gaps between words
+        # -a 200 = max volume, -s 100 = slow speed, -g 15 = longer gaps between words
         # -w outputs to WAV file instead of playing directly
-        subprocess.run(['espeak', '-a', '200', '-s', '120', '-g', '10', '-w', wav_file, text], check=False)
+        subprocess.run(['espeak', '-a', '200', '-s', '100', '-g', '15', '-w', wav_file, text], check=False)
         _play_wav(wav_file)
         try:
             os.unlink(wav_file)
@@ -164,7 +165,7 @@ def speak_with_espeak(text):
             pass
     else:
         # Fall back to direct espeak output
-        subprocess.run(['espeak', '-a', '200', '-s', '120', '-g', '10', text], check=False)
+        subprocess.run(['espeak', '-a', '200', '-s', '100', '-g', '15', text], check=False)
 
 
 def speak_with_say(text):
