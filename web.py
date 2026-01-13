@@ -22,12 +22,13 @@ from bbb.servo import (
     get_servo,
     get_servo_lock,
     get_servo_error,
-    move_mouth,
-    mouth_talking_animation,
+    move_hand,
+    hand_talking_animation,
+    hand_slap_animation,
     laugh_animation,
-    MOUTH_CLOSED,
-    MOUTH_OPEN,
-    MOUTH_HALF,
+    HAND_DOWN,
+    HAND_UP,
+    HAND_MIDDLE,
     GPIO_PIN,
 )
 from bbb.tts import (
@@ -547,11 +548,12 @@ HTML_TEMPLATE = '''
 
         <!-- Servo Test Controls -->
         <div class="servo-controls">
-            <p class="servo-controls-title">🔧 Servo Test</p>
+            <p class="servo-controls-title">🔧 Hand Controls</p>
             <div class="servo-buttons">
-                <button class="btn btn-servo" onclick="servoUp()">⬆️ Mouth Open</button>
-                <button class="btn btn-servo" onclick="servoDown()">⬇️ Mouth Closed</button>
-                <button class="btn btn-servo" onclick="servoTest()">🔄 Test Cycle</button>
+                <button class="btn btn-servo" onclick="servoDown()">⬇️ Hand Down (0°)</button>
+                <button class="btn btn-servo" onclick="servoMiddle()">↔️ Middle (90°)</button>
+                <button class="btn btn-servo" onclick="servoUp()">⬆️ Hand Up (180°)</button>
+                <button class="btn btn-servo" onclick="servoSlap()" style="background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);">👋 SLAP!</button>
             </div>
             <p class="servo-angle" id="servoAngle">Angle: --</p>
         </div>
@@ -594,20 +596,27 @@ HTML_TEMPLATE = '''
                 });
         }
 
-        function servoUp() {
-            setServoAngle(0);  // Mouth open
-        }
-
         function servoDown() {
-            setServoAngle(90);  // Mouth closed
+            setServoAngle(0);  // Hand down (touching ground)
         }
 
-        function servoTest() {
-            document.getElementById('servoAngle').textContent = 'Testing...';
-            fetch('/api/servo/test')
+        function servoMiddle() {
+            setServoAngle(90);  // Hand at middle
+        }
+
+        function servoUp() {
+            setServoAngle(180);  // Hand up
+        }
+
+        function servoSlap() {
+            document.getElementById('servoAngle').textContent = 'Slapping...';
+            fetch('/api/servo/slap')
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('servoAngle').textContent = 'Test complete!';
+                    document.getElementById('servoAngle').textContent = 'SLAP! 👋';
+                    setTimeout(() => {
+                        document.getElementById('servoAngle').textContent = 'Angle: 0°';
+                    }, 1500);
                 })
                 .catch(() => {
                     document.getElementById('servoAngle').textContent = 'Error!';
@@ -813,24 +822,35 @@ def api_joke():
 
 @app.route('/api/servo/talk')
 def api_servo_talk():
-    """Trigger talking mouth animation."""
+    """Trigger talking hand animation."""
     if not servo:
         return jsonify({'status': 'no_servo'})
     
     duration = float(request.args.get('duration', 2.0))
     # Run animation in background thread with locking
-    thread = threading.Thread(target=mouth_talking_animation, args=(duration, True))
+    thread = threading.Thread(target=hand_talking_animation, args=(duration, True))
     thread.start()
     return jsonify({'status': 'ok', 'duration': duration})
 
 @app.route('/api/servo/laugh')
 def api_servo_laugh():
-    """Trigger laugh animation."""
+    """Trigger laugh/slap animation."""
     if not servo:
         return jsonify({'status': 'no_servo'})
     
     # Run animation in background thread with locking
-    thread = threading.Thread(target=laugh_animation, args=(True,))
+    thread = threading.Thread(target=hand_slap_animation, args=(True,))
+    thread.start()
+    return jsonify({'status': 'ok'})
+
+@app.route('/api/servo/slap')
+def api_servo_slap():
+    """Trigger hand slap animation."""
+    if not servo:
+        return jsonify({'status': 'no_servo'})
+    
+    # Run slap animation in background thread with locking
+    thread = threading.Thread(target=hand_slap_animation, args=(True,))
     thread.start()
     return jsonify({'status': 'ok'})
 
@@ -872,39 +892,15 @@ def api_servo_angle():
 
 @app.route('/api/servo/test')
 def api_servo_test():
-    """Run a servo test cycle."""
+    """Run a servo test cycle (same as slap animation)."""
     if not servo:
         return jsonify({'status': 'no_servo', 'error': 'Servo not connected'})
     
-    def test_cycle():
-        with servo_lock:
-            # Move to closed (90°)
-            servo.set_angle(MOUTH_CLOSED)
-        time.sleep(0.5)
-        
-        with servo_lock:
-            # Move to open (0°)
-            servo.set_angle(MOUTH_OPEN)
-        time.sleep(0.5)
-        
-        with servo_lock:
-            # Move to half (45°)
-            servo.set_angle(MOUTH_HALF)
-        time.sleep(0.5)
-        
-        with servo_lock:
-            # Back to closed
-            servo.set_angle(MOUTH_CLOSED)
-        time.sleep(0.3)
-        
-        with servo_lock:
-            servo.release()
-    
-    # Run test in background thread
-    thread = threading.Thread(target=test_cycle)
+    # Run slap animation as the test
+    thread = threading.Thread(target=hand_slap_animation, args=(True,))
     thread.start()
     
-    return jsonify({'status': 'ok', 'message': 'Test cycle started'})
+    return jsonify({'status': 'ok', 'message': 'Slap test started'})
 
 @app.route('/api/speak')
 def api_speak():
