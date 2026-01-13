@@ -713,26 +713,22 @@ HTML_TEMPLATE = '''
             const punchline = document.getElementById('punchline').textContent;
             const estimatedDuration = Math.max(1, punchline.length * 0.08);
             
-            // Always trigger servo for punchline (regardless of sound)
-            triggerServoTalk(estimatedDuration);
-            
             if (soundEnabled) {
-                // Speak the punchline, then laugh
+                // Speak the punchline, then slap
                 speak(punchline, () => {
                     setTimeout(() => {
                         document.getElementById('laugh').classList.add('visible');
                         createConfetti();
-                        triggerServoLaugh();
-                        speak("Ha ha ha ha! That's a good one!", null, true);
+                        triggerServoLaugh();  // SLAP!
+                        speak("Ha ha ha ha! That's a good one!", null, true, true);
                     }, 300);
-                }, false, true);  // skipServo = true since we already triggered it
+                }, false, true);  // skipServo=true, slap happens after speech
             } else {
-                // No sound - just animate servo and show laugh
+                // No sound - just show laugh and slap
                 setTimeout(() => {
-                    triggerServoRelease();
                     document.getElementById('laugh').classList.add('visible');
                     createConfetti();
-                    triggerServoLaugh();
+                    triggerServoLaugh();  // SLAP!
                 }, estimatedDuration * 1000);
             }
         }
@@ -753,17 +749,11 @@ HTML_TEMPLATE = '''
                     document.getElementById('revealBtn').classList.remove('hidden');
                     document.getElementById('laugh').classList.remove('visible');
                     
-                    // Always animate servo for setup (even without sound)
-                    const estimatedDuration = Math.max(1, data.setup.length * 0.08);
-                    triggerServoTalk(estimatedDuration);
-                    
                     if (soundEnabled) {
-                        // Speak the new setup (skip servo since we triggered it above)
+                        // Speak the new setup (arm stays down at 0°)
                         speak(data.setup, null, false, true);
-                    } else {
-                        // No sound - just release servo after animation
-                        setTimeout(() => triggerServoRelease(), estimatedDuration * 1000);
                     }
+                    // Arm stays at 0° - no movement during setup
                 });
         }
 
