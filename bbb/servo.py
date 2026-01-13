@@ -162,9 +162,79 @@ def hand_talking_animation(duration=2.0, use_lock=False):
 mouth_talking_animation = hand_talking_animation
 
 
+def joke_setup_animation(use_lock=False):
+    """
+    Animate arm during joke setup (telling the joke).
+    Pattern: 0° → 180° → 0°
+    (down → raise up → back down)
+    """
+    if not _servo:
+        return
+    
+    def set_angle(angle):
+        if use_lock:
+            with _servo_lock:
+                _servo.set_angle(angle)
+        else:
+            _servo.set_angle(angle)
+    
+    # Start position
+    set_angle(HAND_DOWN)
+    time.sleep(0.1)
+    
+    # Raise arm up to 180°
+    set_angle(HAND_UP)
+    time.sleep(0.5)
+    
+    # Back down to 0°
+    set_angle(HAND_DOWN)
+    time.sleep(0.3)
+    
+    if use_lock:
+        with _servo_lock:
+            _servo.release()
+    else:
+        _servo.release()
+
+
+def punchline_animation(use_lock=False):
+    """
+    Animate arm on punchline reveal.
+    Pattern: 0° → 90° → 0°
+    (down → middle → back down)
+    """
+    if not _servo:
+        return
+    
+    def set_angle(angle):
+        if use_lock:
+            with _servo_lock:
+                _servo.set_angle(angle)
+        else:
+            _servo.set_angle(angle)
+    
+    # Start position
+    set_angle(HAND_DOWN)
+    time.sleep(0.1)
+    
+    # Raise arm to 90° (middle)
+    set_angle(HAND_MIDDLE)
+    time.sleep(0.4)
+    
+    # Back down to 0°
+    set_angle(HAND_DOWN)
+    time.sleep(0.3)
+    
+    if use_lock:
+        with _servo_lock:
+            _servo.release()
+    else:
+        _servo.release()
+
+
 def hand_slap_animation(use_lock=False):
     """
-    Animate hand slapping after a joke.
+    Animate hand slapping (full slap).
     Pattern: 0° → 180° → 0° → 90° → 0°
     (down → up → SLAP! → half up → back down)
     """

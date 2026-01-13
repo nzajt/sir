@@ -23,9 +23,9 @@ from bbb.servo import (
     get_servo_lock,
     get_servo_error,
     move_hand,
-    hand_talking_animation,
+    joke_setup_animation,
+    punchline_animation,
     hand_slap_animation,
-    laugh_animation,
     HAND_DOWN,
     HAND_UP,
     HAND_MIDDLE,
@@ -570,14 +570,22 @@ HTML_TEMPLATE = '''
         const ttsAvailable = {{ 'true' if tts_available else 'false' }};
 
         // Servo control functions
-        function triggerServoTalk(duration) {
+        function triggerServoSetup() {
+            // Arm animation during joke setup: 0° → 180° → 0°
             if (!servoConnected) return;
-            fetch('/api/servo/talk?duration=' + duration).catch(() => {});
+            fetch('/api/servo/setup').catch(() => {});
         }
 
-        function triggerServoLaugh() {
+        function triggerServoPunchline() {
+            // Arm animation on punchline: 0° → 90° → 0°
             if (!servoConnected) return;
-            fetch('/api/servo/laugh').catch(() => {});
+            fetch('/api/servo/punchline').catch(() => {});
+        }
+
+        function triggerServoSlap() {
+            // Full slap animation
+            if (!servoConnected) return;
+            fetch('/api/servo/slap').catch(() => {});
         }
 
         function triggerServoRelease() {
@@ -639,7 +647,7 @@ HTML_TEMPLATE = '''
             setMaxVolume();
         });
 
-        function speak(text, onEnd = null, isLaugh = false, skipServo = false) {
+        function speak(text, onEnd = null, isLaugh = false) {
             if (!soundEnabled) {
                 if (onEnd) onEnd();
                 return;
@@ -651,16 +659,7 @@ HTML_TEMPLATE = '''
             // Estimate speech duration (rough: ~80ms per character for espeak)
             const estimatedDuration = Math.max(1, text.length * 0.08);
             
-            // Trigger servo animation (unless already triggered externally)
-            if (!skipServo) {
-                if (isLaugh) {
-                    triggerServoLaugh();
-                } else {
-                    triggerServoTalk(estimatedDuration);
-                }
-            }
-            
-            // Call server-side TTS (Pi's speakers via espeak)
+            // Call server-side TTS (Pi's speakers)
             let url;
             if (isLaugh) {
                 url = '/api/speak/laugh';
@@ -674,13 +673,11 @@ HTML_TEMPLATE = '''
                     // Wait for estimated speech duration before calling onEnd
                     setTimeout(() => {
                         indicator.classList.remove('active');
-                        triggerServoRelease();
                         if (onEnd) onEnd();
                     }, estimatedDuration * 1000);
                 })
                 .catch(() => {
                     indicator.classList.remove('active');
-                    triggerServoRelease();
                     if (onEnd) onEnd();
                 });
         }
@@ -714,21 +711,21 @@ HTML_TEMPLATE = '''
             const estimatedDuration = Math.max(1, punchline.length * 0.08);
             
             if (soundEnabled) {
-                // Speak the punchline, then slap
+                // Speak the punchline, then animate arm
                 speak(punchline, () => {
                     setTimeout(() => {
                         document.getElementById('laugh').classList.add('visible');
                         createConfetti();
-                        triggerServoLaugh();  // SLAP!
-                        speak("Ha ha ha ha! That's a good one!", null, true, true);
+                        triggerServoPunchline();  // 0° → 90° → 0°
+                        speak("Ha ha ha ha! That's a good one!", null, true);
                     }, 300);
-                }, false, true);  // skipServo=true, slap happens after speech
+                });
             } else {
-                // No sound - just show laugh and slap
+                // No sound - just show laugh and animate
                 setTimeout(() => {
                     document.getElementById('laugh').classList.add('visible');
                     createConfetti();
-                    triggerServoLaugh();  // SLAP!
+                    triggerServoPunchline();  // 0° → 90° → 0°
                 }, estimatedDuration * 1000);
             }
         }
@@ -749,11 +746,13 @@ HTML_TEMPLATE = '''
                     document.getElementById('revealBtn').classList.remove('hidden');
                     document.getElementById('laugh').classList.remove('visible');
                     
+                    // Arm goes up during joke setup: 0° → 180° → 0°
+                    triggerServoSetup();
+                    
                     if (soundEnabled) {
-                        // Speak the new setup (arm stays down at 0°)
-                        speak(data.setup, null, false, true);
+                        // Speak the new setup
+                        speak(data.setup);
                     }
-                    // Arm stays at 0° - no movement during setup
                 });
         }
 
@@ -810,32 +809,31 @@ def api_joke():
     joke = random.choice(JOKES)
     return jsonify(joke)
 
-@app.route('/api/servo/talk')
-def api_servo_talk():
-    """Trigger talking hand animation."""
+@app.route('/api/servo/setup')
+def api_servo_setup():
+    """Trigger setup animation: 0° → 180° → 0° (during joke telling)."""
     if not servo:
         return jsonify({'status': 'no_servo'})
     
-    duration = float(request.args.get('duration', 2.0))
     # Run animation in background thread with locking
-    thread = threading.Thread(target=hand_talking_animation, args=(duration, True))
+    thread = threading.Thread(target=joke_setup_animation, args=(True,))
     thread.start()
-    return jsonify({'status': 'ok', 'duration': duration})
+    return jsonify({'status': 'ok'})
 
-@app.route('/api/servo/laugh')
-def api_servo_laugh():
-    """Trigger laugh/slap animation."""
+@app.route('/api/servo/punchline')
+def api_servo_punchline():
+    """Trigger punchline animation: 0° → 90° → 0°."""
     if not servo:
         return jsonify({'status': 'no_servo'})
     
     # Run animation in background thread with locking
-    thread = threading.Thread(target=hand_slap_animation, args=(True,))
+    thread = threading.Thread(target=punchline_animation, args=(True,))
     thread.start()
     return jsonify({'status': 'ok'})
 
 @app.route('/api/servo/slap')
 def api_servo_slap():
-    """Trigger hand slap animation."""
+    """Trigger full slap animation: 0° → 180° → 0° → 90° → 0°."""
     if not servo:
         return jsonify({'status': 'no_servo'})
     
@@ -882,15 +880,22 @@ def api_servo_angle():
 
 @app.route('/api/servo/test')
 def api_servo_test():
-    """Run a servo test cycle (same as slap animation)."""
+    """Run a servo test cycle (setup + punchline animations)."""
     if not servo:
         return jsonify({'status': 'no_servo', 'error': 'Servo not connected'})
     
-    # Run slap animation as the test
-    thread = threading.Thread(target=hand_slap_animation, args=(True,))
+    def test_sequence():
+        # First do setup animation
+        joke_setup_animation(True)
+        time.sleep(0.5)
+        # Then punchline animation
+        punchline_animation(True)
+    
+    # Run test in background thread
+    thread = threading.Thread(target=test_sequence)
     thread.start()
     
-    return jsonify({'status': 'ok', 'message': 'Slap test started'})
+    return jsonify({'status': 'ok', 'message': 'Test sequence started'})
 
 @app.route('/api/speak')
 def api_speak():
