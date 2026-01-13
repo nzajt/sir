@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Servo controller module for BBB (Boredom Buster Bot)
-Handles servo initialization and mouth animations.
+Handles servo initialization and hand slap animations.
 """
 
 import os
@@ -11,9 +11,16 @@ import threading
 # Servo configuration
 SERVO_ENABLED = True
 GPIO_PIN = 18
-MOUTH_CLOSED = 90   # Degrees when mouth is closed
-MOUTH_OPEN = 0      # Degrees when mouth is fully open
-MOUTH_HALF = 45     # Degrees for half-open mouth
+
+# Hand positions (0° = touching ground, 180° = fully raised)
+HAND_DOWN = 0       # Hand touching ground (rest position)
+HAND_UP = 180       # Hand fully raised
+HAND_MIDDLE = 90    # Hand at middle position
+
+# Legacy aliases for compatibility
+MOUTH_CLOSED = HAND_DOWN
+MOUTH_OPEN = HAND_UP
+MOUTH_HALF = HAND_MIDDLE
 
 # Global servo instance and lock
 _servo = None
@@ -80,10 +87,10 @@ def init_servo(skip_if_reloader=False):
     
     try:
         _servo = ServoController(GPIO_PIN)
-        _servo.set_angle(MOUTH_CLOSED)
+        _servo.set_angle(HAND_DOWN)
         time.sleep(0.3)
         _servo.release()
-        print(f"🤖 Servo initialized on GPIO {GPIO_PIN}")
+        print(f"🤖 Servo initialized on GPIO {GPIO_PIN} (hand at rest)")
         return _servo, None
     except Exception as e:
         _servo = None
@@ -107,7 +114,7 @@ def get_servo_error():
     return _servo_error
 
 
-def move_mouth(angle, use_lock=False):
+def move_hand(angle, use_lock=False):
     """Move servo to specified angle if available."""
     if _servo:
         if use_lock:
@@ -117,8 +124,12 @@ def move_mouth(angle, use_lock=False):
             _servo.set_angle(angle)
 
 
-def mouth_talking_animation(duration=2.0, use_lock=False):
-    """Animate mouth while talking (open/close pattern)."""
+# Legacy alias
+move_mouth = move_hand
+
+
+def hand_talking_animation(duration=2.0, use_lock=False):
+    """Animate hand while talking (small up/down movements)."""
     if not _servo:
         return
     
@@ -126,31 +137,36 @@ def mouth_talking_animation(duration=2.0, use_lock=False):
     while time.time() - start_time < duration:
         if use_lock:
             with _servo_lock:
-                _servo.set_angle(MOUTH_OPEN)
+                _servo.set_angle(HAND_MIDDLE)
         else:
-            _servo.set_angle(MOUTH_OPEN)
+            _servo.set_angle(HAND_MIDDLE)
         time.sleep(0.15)
         
         if use_lock:
             with _servo_lock:
-                _servo.set_angle(MOUTH_CLOSED)
+                _servo.set_angle(HAND_DOWN)
         else:
-            _servo.set_angle(MOUTH_CLOSED)
+            _servo.set_angle(HAND_DOWN)
         time.sleep(0.1)
     
     if use_lock:
         with _servo_lock:
-            _servo.set_angle(MOUTH_CLOSED)
+            _servo.set_angle(HAND_DOWN)
             _servo.release()
     else:
-        _servo.set_angle(MOUTH_CLOSED)
+        _servo.set_angle(HAND_DOWN)
         _servo.release()
 
 
-def laugh_animation(use_lock=False):
+# Legacy alias
+mouth_talking_animation = hand_talking_animation
+
+
+def hand_slap_animation(use_lock=False):
     """
-    Animate mouth for laughing: Ha ha ha ha!
-    Pattern: closed → open → half → open → half → open → closed
+    Animate hand slapping after a joke.
+    Pattern: 0° → 180° → 0° → 90° → 0°
+    (down → up → SLAP! → half up → back down)
     """
     if not _servo:
         return
@@ -162,30 +178,24 @@ def laugh_animation(use_lock=False):
         else:
             _servo.set_angle(angle)
     
-    # Ha
-    set_angle(MOUTH_OPEN)
-    time.sleep(0.2)
-    set_angle(MOUTH_HALF)
-    time.sleep(0.15)
+    # Start position (should already be here)
+    set_angle(HAND_DOWN)
+    time.sleep(0.1)
     
-    # ha
-    set_angle(MOUTH_OPEN)
-    time.sleep(0.2)
-    set_angle(MOUTH_HALF)
-    time.sleep(0.15)
-    
-    # ha
-    set_angle(MOUTH_OPEN)
-    time.sleep(0.2)
-    set_angle(MOUTH_HALF)
-    time.sleep(0.15)
-    
-    # ha!
-    set_angle(MOUTH_OPEN)
+    # Raise hand up
+    set_angle(HAND_UP)
     time.sleep(0.3)
     
-    # Close mouth
-    set_angle(MOUTH_CLOSED)
+    # SLAP down!
+    set_angle(HAND_DOWN)
+    time.sleep(0.2)
+    
+    # Bounce up to middle
+    set_angle(HAND_MIDDLE)
+    time.sleep(0.25)
+    
+    # Back down to rest
+    set_angle(HAND_DOWN)
     time.sleep(0.2)
     
     if use_lock:
@@ -193,4 +203,8 @@ def laugh_animation(use_lock=False):
             _servo.release()
     else:
         _servo.release()
+
+
+# Legacy alias
+laugh_animation = hand_slap_animation
 
