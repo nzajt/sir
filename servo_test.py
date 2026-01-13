@@ -185,44 +185,186 @@ def position_test(servo):
     print("\n✓ Position test complete! (servo released)")
 
 
+def calibration_mode(servo):
+    """Calibration mode to find the zero point for your mechanism."""
+    print("\n🔧 Calibration Mode")
+    print("=" * 50)
+    print("Find where YOUR mechanism's 'closed' and 'open' positions are.")
+    print()
+    print("Instructions:")
+    print("  1. Use +/- keys or enter angles (0-180) to move the servo")
+    print("  2. Find the position where the mouth is CLOSED")
+    print("  3. Type 'closed' to mark it")
+    print("  4. Find the position where the mouth is fully OPEN")
+    print("  5. Type 'open' to mark it")
+    print("  6. Type 'done' to see the config values")
+    print()
+    print("Commands:")
+    print("  +/++   : Move +5° / +10°")
+    print("  -/--   : Move -5° / -10°")
+    print("  0-180  : Jump to specific angle")
+    print("  closed : Mark current position as MOUTH CLOSED")
+    print("  open   : Mark current position as MOUTH OPEN")
+    print("  done   : Show config and exit calibration")
+    print("  quit   : Exit without saving")
+    print("-" * 50)
+    
+    current = 90
+    closed_pos = None
+    open_pos = None
+    
+    # Start at center
+    print(f"\nStarting at {current}°...")
+    servo.set_angle(current)
+    
+    while True:
+        try:
+            status = f"[Current: {current}°"
+            if closed_pos is not None:
+                status += f" | Closed: {closed_pos}°"
+            if open_pos is not None:
+                status += f" | Open: {open_pos}°"
+            status += "]"
+            
+            cmd = input(f"{status} > ").strip().lower()
+            
+            if cmd == 'quit' or cmd == 'q':
+                print("Calibration cancelled.")
+                return None, None
+            
+            elif cmd == 'done':
+                if closed_pos is None or open_pos is None:
+                    print("  ⚠ Please mark both 'closed' and 'open' positions first!")
+                    continue
+                
+                print("\n" + "=" * 50)
+                print("✅ CALIBRATION COMPLETE!")
+                print("=" * 50)
+                print("\nUpdate these values in bbb/servo.py:\n")
+                print(f"  MOUTH_CLOSED = {closed_pos}   # Degrees when mouth is closed")
+                print(f"  MOUTH_OPEN = {open_pos}      # Degrees when mouth is fully open")
+                
+                # Calculate half position
+                half_pos = (closed_pos + open_pos) // 2
+                print(f"  MOUTH_HALF = {half_pos}     # Degrees for half-open mouth")
+                
+                print("\n" + "-" * 50)
+                print("Copy these lines to your config!")
+                print("-" * 50)
+                
+                return closed_pos, open_pos
+            
+            elif cmd == 'closed':
+                closed_pos = current
+                print(f"  ✓ Marked {current}° as MOUTH CLOSED")
+            
+            elif cmd == 'open':
+                open_pos = current
+                print(f"  ✓ Marked {current}° as MOUTH OPEN")
+            
+            elif cmd == '+':
+                current = min(180, current + 5)
+                servo.set_angle(current)
+                print(f"  → {current}°")
+            
+            elif cmd == '++':
+                current = min(180, current + 10)
+                servo.set_angle(current)
+                print(f"  → {current}°")
+            
+            elif cmd == '-':
+                current = max(0, current - 5)
+                servo.set_angle(current)
+                print(f"  → {current}°")
+            
+            elif cmd == '--':
+                current = max(0, current - 10)
+                servo.set_angle(current)
+                print(f"  → {current}°")
+            
+            else:
+                try:
+                    angle = int(cmd)
+                    if 0 <= angle <= 180:
+                        current = angle
+                        servo.set_angle(current)
+                        print(f"  → {current}°")
+                    else:
+                        print("  ⚠ Angle must be 0-180")
+                except ValueError:
+                    print("  ⚠ Unknown command")
+        
+        except KeyboardInterrupt:
+            print("\n")
+            return None, None
+
+
 def interactive_mode(servo):
     """Interactive mode for manual servo control."""
     print("\n🎮 Interactive Mode")
     print("-" * 30)
     print("Commands:")
-    print("  0-180  : Move to angle (e.g., '90' for center)")
-    print("  sweep  : Perform sweep test")
-    print("  center : Move to 90° (center)")
-    print("  min    : Move to 0°")
-    print("  max    : Move to 180°")
-    print("  hold   : Keep servo engaged (holds position, may jitter)")
-    print("  release: Release servo (stops jitter, won't hold)")
-    print("  quit   : Exit program")
+    print("  0-180    : Move to angle (e.g., '90' for center)")
+    print("  +/++     : Move +5° / +10°")
+    print("  -/--     : Move -5° / -10°")
+    print("  sweep    : Perform sweep test")
+    print("  center   : Move to 90° (center)")
+    print("  min      : Move to 0°")
+    print("  max      : Move to 180°")
+    print("  calibrate: Enter calibration mode (find zero point)")
+    print("  hold     : Keep servo engaged (holds position, may jitter)")
+    print("  release  : Release servo (stops jitter, won't hold)")
+    print("  quit     : Exit program")
     print()
     print("💡 Tip: Servo auto-releases after movement to prevent jitter")
     print("   Use 'hold' if you need it to maintain position under load")
     print()
     
+    current_angle = 90  # Track current position
+    
     while True:
         try:
-            cmd = input("Enter command: ").strip().lower()
+            cmd = input(f"[{current_angle}°] Enter command: ").strip().lower()
             
             if cmd == 'quit' or cmd == 'q':
                 break
             elif cmd == 'sweep':
                 sweep_test(servo)
+                current_angle = 0
+            elif cmd == 'calibrate' or cmd == 'cal':
+                calibration_mode(servo)
+                current_angle = 90
             elif cmd == 'center':
-                print("  → Moving to 90°...")
-                servo.set_angle(90)
+                current_angle = 90
+                print(f"  → Moving to {current_angle}°...")
+                servo.set_angle(current_angle)
                 print("  → Done (released)")
             elif cmd == 'min':
-                print("  → Moving to 0°...")
-                servo.set_angle(0)
+                current_angle = 0
+                print(f"  → Moving to {current_angle}°...")
+                servo.set_angle(current_angle)
                 print("  → Done (released)")
             elif cmd == 'max':
-                print("  → Moving to 180°...")
-                servo.set_angle(180)
+                current_angle = 180
+                print(f"  → Moving to {current_angle}°...")
+                servo.set_angle(current_angle)
                 print("  → Done (released)")
+            elif cmd == '+':
+                current_angle = min(180, current_angle + 5)
+                servo.set_angle(current_angle)
+                print(f"  → {current_angle}°")
+            elif cmd == '++':
+                current_angle = min(180, current_angle + 10)
+                servo.set_angle(current_angle)
+                print(f"  → {current_angle}°")
+            elif cmd == '-':
+                current_angle = max(0, current_angle - 5)
+                servo.set_angle(current_angle)
+                print(f"  → {current_angle}°")
+            elif cmd == '--':
+                current_angle = max(0, current_angle - 10)
+                servo.set_angle(current_angle)
+                print(f"  → {current_angle}°")
             elif cmd == 'hold':
                 servo.hold()
                 print("  → Servo engaged (holding position)")
@@ -234,8 +376,9 @@ def interactive_mode(servo):
                 try:
                     angle = int(cmd)
                     if 0 <= angle <= 180:
-                        print(f"  → Moving to {angle}°...")
-                        servo.set_angle(angle)
+                        current_angle = angle
+                        print(f"  → Moving to {current_angle}°...")
+                        servo.set_angle(current_angle)
                         print("  → Done (released)")
                     else:
                         print("  ⚠ Angle must be 0-180")
