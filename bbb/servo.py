@@ -165,7 +165,7 @@ mouth_talking_animation = hand_talking_animation
 def joke_setup_animation(use_lock=False):
     """
     Animate arm during joke setup (telling the joke).
-    Pattern: 0° → 180° → 0°
+    Pattern: 0° → 130° → 0°
     (down → raise up → back down)
     """
     if not _servo:
@@ -182,8 +182,8 @@ def joke_setup_animation(use_lock=False):
     set_angle(HAND_DOWN)
     time.sleep(0.1)
     
-    # Raise arm up to 180°
-    set_angle(HAND_UP)
+    # Raise arm up to 130°
+    set_angle(130)
     time.sleep(0.5)
     
     # Back down to 0°
