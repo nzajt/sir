@@ -112,7 +112,7 @@ def get_tts_lock():
 
 def speak_with_pico(text):
     """
-    Speak using pico2wave (more natural voice) with volume boost and slower speed.
+    Speak using pico2wave (more natural voice) with volume boost.
     
     Args:
         text: The text to speak
@@ -122,11 +122,10 @@ def speak_with_pico(text):
     
     subprocess.run(['pico2wave', '-l', 'en-US', '-w', wav_file, text], check=False)
     
-    # Process with sox if available (boost volume 3x, slow down to 85% speed)
+    # Amplify with sox if available (boost volume 3x)
     if shutil.which('sox'):
-        amplified_file = wav_file + '_processed.wav'
-        # vol 3.0 = 3x volume, tempo 0.85 = 85% speed (slower)
-        subprocess.run(['sox', wav_file, amplified_file, 'vol', '3.0', 'tempo', '0.85'], check=False)
+        amplified_file = wav_file + '_loud.wav'
+        subprocess.run(['sox', wav_file, amplified_file, 'vol', '3.0'], check=False)
         _play_wav(amplified_file)
         try:
             os.unlink(amplified_file)
